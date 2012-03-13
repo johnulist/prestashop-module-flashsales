@@ -1,0 +1,4 @@
+table#flashsales_product img.imgm {height:45px}
+ul#offer_images_container li {display: inline-block; margin: 0 10px 10px 0}
+ul#offer_images_container li img {margin-bottom: 10px}
+.checkbox_offer_image {display: block; margin: 0 auto}
