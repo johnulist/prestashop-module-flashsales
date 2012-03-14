@@ -22,18 +22,18 @@
 						<option value="{$option.value}" {if $config.value eq $option.value}selected="selected"{/if}>{$option.name}</option>
 					{/foreach}
 					</select>
-				{elseif $config.type == 'periodic'}
-					<input type="text" name="{$config.name}" id="{$config.name}" value="{secondsToHours time=$config.value}" />
 				{elseif $config.type == 'time'}
 					<select name="{$config.name}_hours" id="{$config.name}">
 					{section name=hours start=0 loop=24 step=1}
 						{$smarty.section.hours.index}
-					  <option value="{$smarty.section.hours.index}" {if $config.value / 3600 eq $smarty.section.hours.index}selected="selected"{/if}>{twoDigits number=$smarty.section.hours.index}</option>
+						{assign var='value' value=$config.value / 3600}
+					  <option value="{$smarty.section.hours.index}" {if $value|string_format:"%d" eq $smarty.section.hours.index}selected="selected"{/if}>{twoDigits number=$smarty.section.hours.index}</option>
 					{/section}
 					</select> h 
 					<select name="{$config.name}_mins">
-					{section name=mins start=0 loop=59 step=1}
-					  <option value="{$smarty.section.mins.index}" {if {secondsToMinutes time=$config.value} % 3600 eq $smarty.section.mins.index}selected="selected"{/if}>{twoDigits number=$smarty.section.mins.index}</option>
+					{section name=mins start=0 loop=60 step=1}
+						{assign var='value' value={secondsToMinutes time=$config.value % 3600}}
+					  <option value="{$smarty.section.mins.index}" {if $value|string_format:"%d" eq $smarty.section.mins.index}selected="selected"{/if}>{twoDigits number=$smarty.section.mins.index}</option>
 					{/section}
 					</select>
 				{/if}

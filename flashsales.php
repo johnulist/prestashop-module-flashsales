@@ -331,11 +331,28 @@ class FlashSales extends Module
 			3 => array(
 				'config_name'		=> $this->_abbreviation . '_TIME_BETWEEN_PERIOD',
 				'name'			=> strtolower($this->name) . '_time_between_period',
-				'title'		=> $this->l('Time between each sales period'),
-				'type'		=> 'periodic', // boolean, text, radio, select, checkbox or false
+				'title'		=> $this->l('Day(s) between each sales period'),
+				'type'		=> 'select', // boolean, text, radio, select, checkbox or false
+				'options' => array(
+					1 => array(
+						'name' => $this->l('1 day'),
+						'value' => self::_daysToSeconds(1)
+					),
+					2 => array(
+						'name'  => $this->l('2 days'),
+						'value' => self::_daysToSeconds(2)
+					),
+					3 => array(
+						'name'	=> $this->l('3 days'),
+						'value' => self::_daysToSeconds(3)
+					),
+					7 => array(
+						'name'	=> $this->l('7 days'),
+						'value' => self::_daysToSeconds(7)
+					)
+				),
 				'validate' => 'isUnsignedId',
-				'default' => $this->_hoursToSeconds(24),
-				'help'		=> $this->l('set it in hours')
+				'default' => self::_daysToSeconds(1)
 			),
 			4 => array(
 				'config_name'		=> $this->_abbreviation . '_TIME_START_DAY',
@@ -390,7 +407,6 @@ class FlashSales extends Module
 
 		$smarty->register_function('twoDigits', array('Flashsales', 'twoDigitsSmarty'));
 		$smarty->register_function('secondsToMinutes', array('Flashsales', 'secondsToMinutesSmarty'));
-		$smarty->register_function('secondsToHours', array('Flashsales', 'secondsToHoursSmarty'));
 
 		$cache_id = $compile_id = ($this->_debugView ? Tools::passwdGen(8) : null);
 		return $smarty->fetch($this->_tplFile, $cache_id, $compile_id);
@@ -422,6 +438,16 @@ class FlashSales extends Module
 								}
 							}
 						}
+					}
+					elseif($config['type'] == 'time')
+					{
+						$hours = Tools::getValue($config['name'] . '_hours');
+						$mins  = Tools::getValue($config['name'] . '_mins');
+
+						$time = self::_hoursToSeconds($hours) + self::_minutesToSeconds($mins);
+
+						if(!Configuration::updateValue($config['config_name'], $time))
+							return false;
 					}
 					else
 					{
@@ -866,32 +892,35 @@ class FlashSales extends Module
 			return false;
 	}
 
-	private function _hoursToSeconds($time)
+	/* Time converters */
+	private static function _daysToSeconds($time)
 	{
-		$time *= 3600;
-		
-		return $time;
+		return $time *= 86400;
 	}
 
-	private function _minutesToSeconds($time)
+	private static function _secondsToDays($time)
 	{
-		$time *= 60;
-		
-		return $time;
+		return $time /= 86400;
+	}
+
+	private static function _minutesToSeconds($time)
+	{
+		return $time *= 60;
+	}
+
+	private static function _hoursToSeconds($time)
+	{
+		return $time *= 3600;
 	}
 
 	private static function _secondsToHours($time)
 	{
-		 $time /= 3600;
-
-		 return $time;
+		 return $time /= 3600;
 	}
 
 	private static function _secondsToMinutes($time)
 	{
-		 $time /= 60;
-
-		 return $time;
+		 return $time /= 60;
 	}
 
 	private static function _twoDigits($number)
@@ -911,11 +940,6 @@ class FlashSales extends Module
 	public static function secondsToMinutesSmarty($params, &$smarty)
 	{
 		return self::_secondsToMinutes($params['time']);
-	}
-
-	public static function secondsToHoursSmarty($params, &$smarty)
-	{
-		return self::_secondsToHours($params['time']);
 	}
 }
 ?>
