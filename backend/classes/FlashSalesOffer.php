@@ -130,14 +130,14 @@ class FlashSalesOffer extends ObjectModel
 	public function update($nullValues = false)
 	{
 		if (parent::update($nullValues))
-			return $this->cleanPositions($this->id_cms_category);
+			return $this->cleanPositions($this->id_flashsales_category);
 		return false;
 	}
 
 	public function delete()
 	{
 	 	if (parent::delete())
-			return $this->cleanPositions($this->id_cms_category);
+			return $this->cleanPositions($this->id_flashsales_category);
 		return false;
 	}
 
@@ -217,6 +217,40 @@ class FlashSalesOffer extends ObjectModel
 		}
 
 		return $images;
+	}
+
+	public function updatePosition($way, $position)
+	{
+		if (!$res = Db::getInstance()->ExecuteS('
+			SELECT fo.`id_flashsales_offer`, fo.`position`, fo.`id_flashsales_category` 
+			FROM `'._DB_PREFIX_.'flashsales_offer` fo
+			WHERE fo.`id_flashsales_category` = '.(int)$this->id_flashsales_category.' 
+			ORDER BY fo.`position` ASC'
+		))
+			return false;
+		
+		foreach ($res AS $flashsales)
+			if ((int)($flashsales['id_flashsales_offer']) == (int)($this->id))
+				$movedFlashsales = $flashsales;
+		
+		if (!isset($movedFlashsales) || !isset($position))
+			return false;
+		
+		// < and > statements rather than BETWEEN operator
+		// since BETWEEN is treated differently according to databases
+		return (Db::getInstance()->Execute('
+			UPDATE `'._DB_PREFIX_.'flashsales_offer`
+			SET `position`= `position` '.($way ? '- 1' : '+ 1').'
+			WHERE `position` 
+			'.($way 
+				? '> '.(int)($movedFlashsales['position']).' AND `position` <= '.(int)($position)
+				: '< '.(int)($movedFlashsales['position']).' AND `position` >= '.(int)($position)).'
+			AND `id_flashsales_category`='.(int)($movedFlashsales['id_flashsales_category']))
+		AND Db::getInstance()->Execute('
+			UPDATE `'._DB_PREFIX_.'flashsales_offer`
+			SET `position` = '.(int)($position).'
+			WHERE `id_flashsales_offer` = '.(int)($movedFlashsales['id_flashsales_offer']).'
+			AND `id_flashsales_category`='.(int)($movedFlashsales['id_flashsales_category'])));
 	}
 
 	public static function cleanPositions($id_category)

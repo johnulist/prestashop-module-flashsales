@@ -460,6 +460,18 @@ class AdminFlashSalesOffer extends AdminTab
 			else
 				$this->_errors[] = Tools::displayError('You do not have permission to delete here.');
 		}
+		// POSITION
+		elseif (Tools::getValue('position'))
+		{
+			if ($this->tabAccess['edit'] !== '1')
+				$this->_errors[] = Tools::displayError('You do not have permission to edit here.');
+			elseif (!Validate::isLoadedObject($object = $this->loadObject()))
+				$this->_errors[] = Tools::displayError('An error occurred while updating status for object.').' <b>'.$this->table.'</b> '.Tools::displayError('(cannot load object)');
+			elseif (!$object->updatePosition((int)(Tools::getValue('way')), (int)(Tools::getValue('position'))))
+				$this->_errors[] = Tools::displayError('Failed to update the position.');
+			else
+				Tools::redirectAdmin($currentIndex.'&'.$this->table.'Orderby=position&'.$this->table.'Orderway=asc&conf=4'.(($id_category = (int)(Tools::getValue('id_flashsales_category'))) ? ('&id_flashsales_category='.$id_category) : '').'&token='.Tools::getAdminTokenLite('AdminFlashSalesContent'));
+		}
 	}
 }
 ?>
