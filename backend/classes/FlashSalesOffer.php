@@ -121,6 +121,26 @@ class FlashSalesOffer extends ObjectModel
 		return $fields;
 	}
 
+	public function add($autodate = true, $nullValues = false)
+	{ 
+		$this->position = self::getLastPosition((int)$this->id_flashsales_category);
+		return parent::add($autodate, true); 
+	}
+
+	public function update($nullValues = false)
+	{
+		if (parent::update($nullValues))
+			return $this->cleanPositions($this->id_cms_category);
+		return false;
+	}
+
+	public function delete()
+	{
+	 	if (parent::delete())
+			return $this->cleanPositions($this->id_cms_category);
+		return false;
+	}
+
 	public function getProducts($id_lang, $id_category = false)
 	{
 		
@@ -197,6 +217,30 @@ class FlashSalesOffer extends ObjectModel
 		}
 
 		return $images;
+	}
+
+	public static function cleanPositions($id_category)
+	{
+		$result = Db::getInstance()->ExecuteS('
+		SELECT `id_flashsales_offer`
+		FROM `'._DB_PREFIX_.'flashsales_offer`
+		WHERE `id_flashsales_category` = '.(int)($id_category).'
+		ORDER BY `position`');
+		$sizeof = sizeof($result);
+		for ($i = 0; $i < $sizeof; ++$i){
+				$sql = '
+				UPDATE `'._DB_PREFIX_.'flashsales_offer`
+				SET `position` = '.(int)($i).'
+				WHERE `id_flashsales_category` = '.(int)($id_category).'
+				AND `id_flashsales_offer` = '.(int)($result[$i]['id_flashsales_offer']);
+				Db::getInstance()->Execute($sql);
+			}
+		return true;
+	}
+
+	public static function getLastPosition($id_category)
+	{
+		return (Db::getInstance()->getValue('SELECT MAX(position)+1 FROM `'._DB_PREFIX_.'flashsales_offer` WHERE `id_flashsales_category` = '.(int)($id_category)));
 	}
 
 	public static function getNumberOffersForTheDay($date_start)

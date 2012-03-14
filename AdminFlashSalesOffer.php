@@ -411,6 +411,23 @@ class AdminFlashSalesOffer extends AdminTab
 				}
 			}
 		}
+		// DELETE
+		elseif (Tools::isSubmit('deleteflashsales_offer'))
+		{
+			$flashsales_offer = new FlashSalesOffer((int)(Tools::getValue('id_flashsales_offer')));
+			$flashsales_offer->cleanPositions($flashsales_offer->id_flashsales_category);
+			if (!$flashsales_offer->delete())
+				$this->_errors[] = Tools::displayError('An error occurred while deleting object.').' <b>'.$this->table.' ('.mysql_error().')</b>';
+			else
+			{
+				if(!Db::getInstance()->Execute("DELETE FROM `" . _DB_PREFIX_ . "flashsales_product` WHERE `id_flashsales_offer` = " . $flashsales_offer->id))
+					$this->_errors[] = Tools::displayError('An error occurred while deleting offer products.');
+				elseif(!Db::getInstance()->Execute("DELETE FROM `" . _DB_PREFIX_ . "flashsales_offer_image` WHERE `id_flashsales_offer` = " . $flashsales_offer->id))
+					$this->_errors[] = Tools::displayError('An error occurred while deleting offer images.');
+				else
+					Tools::redirectAdmin($currentIndex.'&id_flashsales_category='.$flashsales_offer->id_flashsales_category.'&conf=1&token='.Tools::getAdminTokenLite('AdminFlashSalesContent'));
+			}
+		}
 	}
 }
 ?>
