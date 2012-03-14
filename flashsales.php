@@ -304,11 +304,11 @@ class FlashSales extends Module
 			0 => array(
 				'config_name'		=> $this->_abbreviation . '_NB_OFFERS',
 				'name'			=> strtolower($this->name) . '_nb_offers',
-				'title'		=> $this->l('Number of offers to display'),
+				'title'		=> $this->l('Number of offers by period'),
 				'type'		=> 'text', // boolean, text, radio, select, checkbox or false
 				'validate' => 'isUnsignedId',
 				'default' => 4,
-				'help'		=> $this->l('provide a number of offers to display')
+				'help'		=> $this->l('provide a number of offers by period')
 			),
 			1 => array(
 				'config_name'		=> $this->_abbreviation . '_NB_PICTURES',
