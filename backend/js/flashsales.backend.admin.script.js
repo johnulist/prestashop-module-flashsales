@@ -22,8 +22,8 @@ if(typeof Prestashop.flashsales.backend.too_less_images == 'undefined')
 	Prestashop.flashsales.backend.too_less_images = 'You have to select ' + Prestashop.flashsales.backend.nb_images + ' images.';
 
 $(document).ready(function() {
-	$('input.flashsales_productBox').click(onCheckFlashSalesProductBox);
-	$('table#flashsales_product input[name="checkme"]').click(onCheckChekme);
+	//$('input.flashsales_productBox').click(onCheckFlashSalesProductBox);
+	//$('table#flashsales_product input[name="checkme"]').click(onCheckChekme);
 	$('input.checkbox_offer_image').click(onCheckFlashSalesImageBox);
 	$('input[name="submitAddflashsales_offer"]').click(onClickSubmitAddFlashsaleOffer);
 });

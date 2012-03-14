@@ -22,6 +22,9 @@ class FlashSalesOffer extends ObjectModel
 	public $date_add;
 	public $date_upd;
 
+	public $images;
+	public $products;
+
 	protected $table = 'flashsales_offer';
 	protected $identifier = 'id_flashsales_offer';
 
@@ -49,6 +52,15 @@ class FlashSalesOffer extends ObjectModel
 		'meta_description' => 'isGenericName'
 	);
 
+
+	public function __construct($id_flashsales_offer = NULL, $id_lang = NULL)
+	{
+		parent::__construct($id_flashsales_offer, $id_lang);
+		if(!$id_lang)
+			$id_lang = Configuration::get('PS_LANG_DEFAULT');
+		$this->products = self::getProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $id_flashsales_offer);
+		$this->images = self::getImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $id_flashsales_offer);
+	}
 	public function getFields()
 	{
 		parent::validateFields();
@@ -59,7 +71,7 @@ class FlashSalesOffer extends ObjectModel
 		$fields['active'] = (int)($this->active);
 		$fields['position'] = (int)($this->position);
 		$fields['video'] = pSQL($this->video);
-		$fields['video_forward'] = (int)($this->video);
+		$fields['video_forward'] = (int)($this->video_forward);
 		$fields['date_start'] = pSQL($this->date_start);
 		$fields['date_end'] = pSQL($this->date_end);
 
@@ -120,10 +132,11 @@ class FlashSalesOffer extends ObjectModel
 			{
 				foreach($all_products AS &$product)
 				{
-					if(self::_rec_in_array($product['id_product'], $flashsales_products))
-						$product['checked'] = 1;
-					else
-						$product['checked'] = 0;
+					foreach($flashsales_products AS $fproduct)
+					{
+						if($fproduct['id_product'] == $product['id_product'])
+							$product['flashsales_checked'] = 1;
+					}
 				}
 			}
 		}
@@ -131,30 +144,53 @@ class FlashSalesOffer extends ObjectModel
 		return $all_products;
 	}
 
-	public static function getImages($id_flashsales_offer)
+	public static function getImages($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false)
 	{
-		if(!$id_flashsales_offer)
-			return null;
-		$flashsales_products	= Db::getInstance()->ExecuteS('SELECT fp.`id_product` FROM `'._DB_PREFIX_.'flashsales_product` fp WHERE fp.`id_flashsales_offer` = ' . (int)$id_flashsales_offer);
-		$flashsales_images		= Db::getInstance()->ExecuteS('SELECT foi.`id_image` FROM `'._DB_PREFIX_.'flashsales_offer_image` foi WHERE foi.`id_flashsales_offer` = ' . (int)$id_flashsales_offer);
+		if($id_flashsales_offer)
+			$flashsales_images = Db::getInstance()->ExecuteS('SELECT foi.`id_image` FROM `'._DB_PREFIX_.'flashsales_offer_image` foi WHERE foi.`id_flashsales_offer` = ' . (int)$id_flashsales_offer);
 
-		if(empty($flashsales_products) || empty($flashsales_images))
-			return null;
+		$all_products = self::getProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false);
 		$images = array();
-		foreach($flashsales_products AS $product)
+		foreach($all_products AS $fproduct)
 		{
-			$image = Db::getInstance()->getRow('
-				SELECT id_image
-				FROM '._DB_PREFIX_.'image
-				WHERE id_product = '.(int)($product['id_product']).' AND cover = 1'
-			);
-			$images[] = array(
-				'id_product' => $product['id_product'],
-				'id_image' => $image['id_image'],
-				'checked' => (self::_rec_in_array($image['id_image'], $flashsales_images) ? 1 : 0)
-			);
+			$product = new Product($fproduct['id_product'], $id_lang);
+			$fimages = $product->getCombinationImages($id_lang);
+			if(!empty($fimages))
+			{
+				foreach($fimages AS $fimage)
+				{
+					$images[] = array(
+						'id_product' => $product->id,
+						'id_image'	 => $fimage[0]['id_image'],
+						'legend' => $fimage[0]['legend'],
+						'id_product_attribute' => $fimage[0]['id_product_attribute']
+					);
+				}
+			}
+			else
+			{
+				$image = $product->getCover($product->id);
+
+				$images[] = array(
+					'id_product' => $product->id,
+					'id_image'	 => $image['id_image'],
+					'legend' => $product->name
+				);
+			}
 		}
-		
+		$images = self::distinctMultiDimensionalArray($images, 'id_image', true);
+		if(isset($flashsales_images))
+		{
+			foreach($flashsales_images AS $fimage)
+			{
+				foreach($images AS &$image)
+				{
+					if($image['id_image'] == $fimage['id_image'])
+						$image['checked'] = 1;
+				}
+			}
+		}
+
 		return $images;
 	}
 
@@ -172,6 +208,46 @@ class FlashSalesOffer extends ObjectModel
 		}
 
 		return $ret;
+	}
+	
+	public static function distinctMultiDimensionalArray($array, $keySearch, $overwrite = false, $exception = array())
+	{
+		// Check if it's an array
+		if( !is_array($array) )
+			return false;
+
+		$result = array();
+
+		foreach ( $array as $entry ) 
+		{
+			// If email doesn't exist
+			if ( !isset($result[$entry[$keySearch]]) ) 
+				$result[$entry[$keySearch]] = $entry;
+			else 
+			{
+				// If email exist
+				foreach ( $entry as $key => $value ) 
+				{
+					if( !empty($value) )
+					{
+						// If not empty value and this value is different from before and you don't want to overwrite values
+						// Or you want to overwrite values except some keys
+						if( ( !empty( $result[$entry[$keySearch]][$key] ) 
+									&& $result[$entry[$keySearch]][$key] != $value 
+									&& $overwrite == false )
+							||
+								( $overwrite == true 
+									&& in_array($key, $exception) ) )
+							$result[$entry[$keySearch]][$key] = $result[$entry[$keySearch]][$key] . ', ' . $value;
+						else
+							$result[$entry[$keySearch]][$key] = $value;
+					}
+				}
+			}
+		}
+		$result = array_values($result);
+
+		return $result;
 	}
 }
 ?>

@@ -31,7 +31,6 @@ class AdminFlashSalesOffer extends AdminTab
 		);
 
 		//$this->_select	 = '';
-		//$this->_join		 = '';
 		$this->_where		 = 'AND a.`date_end` > CURRENT_DATE()';
 		//$this->_group		 = '';
 		//$this->_having	 = '';
@@ -52,9 +51,10 @@ class AdminFlashSalesOffer extends AdminTab
 
 		$active = $this->getFieldValue($obj, 'active');
 		$id_lang = (int)$cookie->id_lang;
-		$all_products = FlashSalesOffer::getProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
+		$all_products = $obj->products;
+		$images = $obj->images;
 		$currency = new Currency(Configuration::get('PS_CURRENCY_DEFAULT'));
-
+		//die(print_r($all_products));
 		echo '<link rel="stylesheet" href="../modules/' . strtolower($this->_module) . '/backend/css/' . strtolower($this->_module) . '.backend.admin.style.css">';
 		echo '<script src="../modules/' . strtolower($this->_module) . '/backend/js/' . strtolower($this->_module) . '.backend.admin.script.js"></script>';
 		echo '<script type="text/javascript">';
@@ -105,7 +105,7 @@ class AdminFlashSalesOffer extends AdminTab
 		echo '		
 				<label>'.$this->l('Start:').' </label>
 				<div class="margin-form">
-					<input type="text" size="20" id="date_start" name="date_start" value="'.($this->getFieldValue($obj, 'date_start') ? htmlentities($this->getFieldValue($obj, 'date_start'), ENT_COMPAT, 'UTF-8') : date('Y-m-d')).'" /> <sup>*</sup>
+					<input type="text" size="20" id="date_start" name="date_start" value="'.($this->getFieldValue($obj, 'date_start') ? htmlentities($this->getFieldValue($obj, 'date_start'), ENT_COMPAT, 'UTF-8') : date('Y-m-d', time() + Configuration::get('FS_TIME_BETWEEN_PERIOD'))).'" /> <sup>*</sup>
 					<p class="clear">'.$this->l('Start date from which offer can be displayed').'<br />'.$this->l('Format: YYYY-MM-DD').'</p>
 				</div>';
 				
@@ -171,10 +171,10 @@ class AdminFlashSalesOffer extends AdminTab
 												echo '<tr'.((isset($image['id_image']) AND isset($products[$k]['image_size'])) ? ' height="'.($products[$k]['image_size'][1] + 7).'"' : '').'>';
 												echo '	<td class="center">';
 												if ($this->delete AND (!isset($this->_listSkipDelete) OR !in_array($id, $this->_listSkipDelete)))
-												echo '		<input type="checkbox" name="flashsales_productBox[]" class="flashsales_productBox" value="'.$product['id_product'].'" class="noborder" '. (isset($product['checked']) && $product['checked']  ? 'checked="checked"' : '' ) .' />';
+												echo '		<input type="checkbox" name="flashsales_productBox[]" class="flashsales_productBox" value="'.$product['id_product'].'" class="noborder" '. (isset($product['flashsales_checked']) && $product['flashsales_checked']  ? 'checked="checked"' : '' ) .' />';
 												echo '</td>';
 												echo '	<td>' . $product['id_product'] . '</td>';
-												echo '<td align="center">'.(isset($image['id_image']) ? cacheImage(_PS_IMG_DIR_.'p/'.$imageObj->getExistingImgPath().'.jpg', 'product_mini_flashsales_'.(int)($product['id_product']).(isset($product['product_attribute_id']) ? '_'.(int)($product['product_attribute_id']) : '').'.jpg', 80, 'jpg') : '--').'</td>';
+												echo '<td align="center">'.(isset($image['id_image']) ? cacheImage(_PS_IMG_DIR_.'p/'.$imageObj->getExistingImgPath().'.jpg', 'product_mini_flashsales_'.(int)($product['id_product']).(isset($product['id_product_attribute']) ? '_'.(int)($product['id_product_attribute']) : '').'.jpg', 80, 'jpg') : '--').'</td>';
 												echo '<td>'.$product['name'].'</td>';
 												echo '<td>' . Tools::displayPrice($product['price'], $currency, false) . '</td>';
 												echo '<td>'.$product['quantity'].'</td>';
@@ -190,7 +190,6 @@ class AdminFlashSalesOffer extends AdminTab
 		echo '</fieldset>';
 		echo '	<p class="clear"></p>';
 		// OFFER IMAGES
-		$images = FlashSalesOffer::getImages($obj->id);
 		echo '<fieldset style="font-size: 1em">
 						<legend><img src="../img/admin/picture.gif">'. $this->l('Offer images') .'</legend>
 						<p>'. $this->l('Select') . ' ' . Configuration::get('FS_NB_PICTURES', 3) . ' ' . $this->l('images you want to display in your offer.').'</p>
@@ -201,8 +200,8 @@ class AdminFlashSalesOffer extends AdminTab
 							{
 								$imageObj = new Image($image['id_image']);
 								echo '<li class="flashsales_offer_image" id="flashsales_offer_image_' . $image['id_product'] . '">';
-								echo cacheImage(_PS_IMG_DIR_.'p/'.$imageObj->getExistingImgPath().'.jpg', 'product_mini_flashsales_'.(int)($image['id_product']).(isset($image['product_attribute_id']) ? '_'.(int)($image['product_attribute_id']) : '').'.jpg', 80, 'jpg');
-								echo '<input type="checkbox" class="checkbox_offer_image" name="flashsales_offer_image[]" value="' . $image['id_product'] . '" '. ($image['checked'] ? 'checked="checked"' : '') .' />';
+								echo cacheImage(_PS_IMG_DIR_.'p/'.$imageObj->getExistingImgPath().'.jpg', 'product_mini_flashsales_'.(int)($image['id_product']).(isset($image['id_product_attribute']) ? '_'.(int)($image['id_product_attribute']) : '').'.jpg', 80, 'jpg');
+								echo '<input type="checkbox" class="checkbox_offer_image" name="flashsales_offer_image[]" value="' . $image['id_image'] . '" '. (isset($image['checked']) && $image['checked'] ? 'checked="checked"' : '') .' />';
 								echo '</li>';
 								
 							}
@@ -316,7 +315,10 @@ class AdminFlashSalesOffer extends AdminTab
 				$this->_errors[] = Tools::displayError('You need to select the default picture of the offer');
 			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) != Configuration::get('FS_NB_PICTURES'))
 				$this->_errors[] = Tools::displayError('You have to select') . ' ' . Configuration::get('FS_NB_PICTURES') . ' ' . Tools::displayError('images');
-	
+
+			if(strtotime(Tools::getValue('date_start')) < strtotime(date('Y-m-d')) + Configuration::get('FS_TIME_BETWEEN_PERIOD'))
+				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');
+
 			if (!sizeof($this->_errors))
 			{
 				// ADD NEW ONE
@@ -335,7 +337,7 @@ class AdminFlashSalesOffer extends AdminTab
 						$products = '';
 						foreach($flashsales_offer_products AS $k => $id_product)
 						{
-							$products = "('" . $flashsales_offer->id . "', '" . $id_product . "', NOW(), NOW())";
+							$products .= "('" . $flashsales_offer->id . "', '" . $id_product . "', NOW(), NOW())";
 							if($k + 1 != count($flashsales_offer_products))
 								$products .= ', ';
 						}
@@ -343,14 +345,12 @@ class AdminFlashSalesOffer extends AdminTab
 						// Offer images
 						$flashsales_offer_images = Tools::getValue('flashsales_offer_image');
 						$images = '';
-						foreach($flashsales_offer_images AS $k => $id_product)
+						foreach($flashsales_offer_images AS $k => $id_image)
 						{
 							if($k <= Configuration::get('FS_NB_PICTURES') - 1)
 							{
-								// Get id image
-								$id_image = Product::getCover($id_product);
 								// Prepare query
-								$images .= "('" . $flashsales_offer->id . "', '" . $id_image['id_image'] . "', '" . $k . "', NOW(), NOW())";
+								$images .= "('" . $flashsales_offer->id . "', '" . $id_image . "', '" . $k . "', NOW(), NOW())";
 								if($k + 1 != count($flashsales_offer_images))
 									$images .= ', ';
 							}
