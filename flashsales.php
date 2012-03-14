@@ -362,6 +362,12 @@ class FlashSales extends Module
 				'validate' => 'isUnsignedId',
 				'default' => 36000,
 				'help'		=> $this->l('set time start')
+			),
+			5 => array(
+				'config_name'		=> $this->_abbreviation . '_NEXT_PERIOD',
+				'name'			=> strtolower($this->name) . '_next_period',
+				'type'		=> false, // boolean, text, radio, select, checkbox or false
+				'default' => strtotime('midnight') + self::_daysToSeconds(1) + 36000
 			)
 		);
 
@@ -456,6 +462,11 @@ class FlashSales extends Module
 					}
 				}
 			}
+
+			// Special
+			$time = strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD') + Configuration::get($this->_abbreviation . '_TIME_START_DAY');
+			Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', $time);
+
 			$output .= '<div class="conf confirm"><img src="../img/admin/ok.gif" alt="'.$this->l('Confirmation').'" />'.$this->l('Settings updated').'</div>';
 		}
 

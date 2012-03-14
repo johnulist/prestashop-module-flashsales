@@ -48,7 +48,6 @@ class AdminFlashSalesOffer extends AdminTab
 
 		if (!($obj = $this->loadObject(true)))
 			return;
-
 		$active = $this->getFieldValue($obj, 'active');
 		$id_lang = (int)$cookie->id_lang;
 		$all_products = FlashSalesOffer::getAllProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
@@ -105,7 +104,7 @@ class AdminFlashSalesOffer extends AdminTab
 		echo '		
 				<label>'.$this->l('Start:').' </label>
 				<div class="margin-form">
-					<input type="text" size="20" id="date_start" name="date_start" value="'.($this->getFieldValue($obj, 'date_start') ? htmlentities($this->getFieldValue($obj, 'date_start'), ENT_COMPAT, 'UTF-8') : date('Y-m-d', time() + Configuration::get('FS_TIME_BETWEEN_PERIOD'))).'" /> <sup>*</sup>
+					<input type="text" size="20" id="date_start" name="date_start" value="'.($this->getFieldValue($obj, 'date_start') ? htmlentities($this->getFieldValue($obj, 'date_start'), ENT_COMPAT, 'UTF-8') : date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'))).'" /> <sup>*</sup>
 					<p class="clear">'.$this->l('Start date from which offer can be displayed').'<br />'.$this->l('Format: YYYY-MM-DD').'</p>
 				</div>';
 				
