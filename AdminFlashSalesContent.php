@@ -4,13 +4,11 @@ include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesOffer.php';
 include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesCategory.php';
 include_once(_PS_MODULE_DIR_ . 'flashsales/AdminFlashSalesCategories.php');
 include_once(_PS_MODULE_DIR_ . 'flashsales/AdminFlashSalesOffer.php');
-include_once(_PS_MODULE_DIR_ . 'flashsales/AdminFlashSalesOfTheWeek.php');
 
 class AdminFlashSalesContent extends AdminTab
 {
 	private $adminFlashSalesCategories;
 	private $adminFlashSalesOffer;
-	private $adminFlashSalesOfTheWeek;
 
 	private static $_category;
 
@@ -25,7 +23,6 @@ class AdminFlashSalesContent extends AdminTab
 		$this->table = array('flashsales_category', 'flashsales_offer');
 		$this->adminFlashSalesCategories = new adminFlashSalesCategories();
 		$this->adminFlashSalesOffer = new adminFlashSalesOffer();
-		$this->adminFlashSalesOfTheWeek = new adminFlashSalesOfTheWeek();
 
 		parent::__construct();
 	}
@@ -40,7 +37,6 @@ class AdminFlashSalesContent extends AdminTab
 		$result = parent::viewAccess($disable);
 		$this->adminFlashSalesCategories->tabAccess = $this->tabAccess;
 		$this->adminFlashSalesOffer->tabAccess = $this->tabAccess;
-		$this->adminFlashSalesOfTheWeek->tabAccess = $this->tabAccess;
 
 		return $result;
 	}
@@ -81,19 +77,12 @@ class AdminFlashSalesContent extends AdminTab
 		if (!$id_flashsales_category)
 			$id_flashsales_category = 1;
 		$flashsales_tabs = array('flashsales_category', 'flashsales_offer');
-		// Cleaning links
-		$catBarIndex = $currentIndex;
-		foreach ($flashsales_tabs AS $tab)
-			if (Tools::getValue($tab.'Orderby') && Tools::getValue($tab.'Orderway')) 
-				$catBarIndex = preg_replace('/&'.$tab.'Orderby=([a-z _]*)&'.$tab.'Orderway=([a-z]*)/i', '', $currentIndex);
-		echo '<h2>' . $this->l('Flash sales of the week') . '</h2>';
-		$this->adminFlashSalesOfTheWeek->display($this->token);
-		echo '<div class="cat_bar"><span style="color: #3C8534;">'.$this->l('Current flash sales category').' :</span>&nbsp;&nbsp;&nbsp;'.getPath($catBarIndex, $id_flashsales_category,'','','flashsales_offer').'</div>';
-		echo '<h2>'.$this->l('Categories').'</h2>';
-		$this->adminFlashSalesCategories->display($this->token);
-		echo '<div style="margin:10px">&nbsp;</div>';
-		echo '<h2>'.$this->l('Flashsales in this category').'</h2>';
+		//echo '<div class="cat_bar"><span style="color: #3C8534;">'.$this->l('Current flash sales category').' :</span>&nbsp;&nbsp;&nbsp;'.getPath($catBarIndex, $id_flashsales_category,'','','flashsales_offer').'</div>';
+		echo '<h2>'.$this->l('Flashsales of the moment').'</h2>';
 		$this->adminFlashSalesOffer->display($this->token);
+		echo '<div style="margin:10px">&nbsp;</div>';
+		echo '<h2>'.$this->l('Flashsales categories').'</h2>';
+		$this->adminFlashSalesCategories->display($this->token);
 		}
 		
 	}

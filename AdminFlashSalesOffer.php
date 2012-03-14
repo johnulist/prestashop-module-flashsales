@@ -292,8 +292,6 @@ class AdminFlashSalesOffer extends AdminTab
 		//$this->getList((int)($cookie->id_lang));
 		if (!$id_flashsales_category)
 			$id_flashsales_category = 1;
-		echo '<h3>'.(!$this->_listTotal ? ($this->l('No pages found')) : ($this->_listTotal.' '.($this->_listTotal > 1 ? $this->l('pages') : $this->l('page')))).' '.
-		$this->l('in category').' "'.stripslashes(FlashSalesCategory::hideFlashSalesCategoryPosition($this->_category->getName())).'"</h3>';
 		echo '<a href="'.$currentIndex.'&id_flashsales_category='.$id_flashsales_category.'&add'.$this->table.'&token='.Tools::getAdminTokenLite('AdminFlashSalesContent').'"><img src="../img/admin/add.gif" border="0" /> '.$this->l('Add a new flash sales').'</a>';
 		echo'<div style="margin:10px;">';
 		$this->displayList($token);
