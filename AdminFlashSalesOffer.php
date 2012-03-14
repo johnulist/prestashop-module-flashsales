@@ -51,8 +51,8 @@ class AdminFlashSalesOffer extends AdminTab
 
 		$active = $this->getFieldValue($obj, 'active');
 		$id_lang = (int)$cookie->id_lang;
-		$all_products = $obj->products;
-		$images = $obj->images;
+		$all_products = FlashSalesOffer::getAllProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
+		$all_images =  FlashSalesOffer::getAllImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
 		$currency = new Currency(Configuration::get('PS_CURRENCY_DEFAULT'));
 		//die(print_r($all_products));
 		echo '<link rel="stylesheet" href="../modules/' . strtolower($this->_module) . '/backend/css/' . strtolower($this->_module) . '.backend.admin.style.css">';
@@ -194,9 +194,9 @@ class AdminFlashSalesOffer extends AdminTab
 						<legend><img src="../img/admin/picture.gif">'. $this->l('Offer images') .'</legend>
 						<p>'. $this->l('Select') . ' ' . Configuration::get('FS_NB_PICTURES', 3) . ' ' . $this->l('images you want to display in your offer.').'</p>
 						<ul id="offer_images_container">';
-						if($images)
+						if($all_images)
 						{
-							foreach($images AS $image)
+							foreach($all_images AS $image)
 							{
 								$imageObj = new Image($image['id_image']);
 								echo '<li class="flashsales_offer_image" id="flashsales_offer_image_' . $image['id_product'] . '">';
@@ -206,8 +206,7 @@ class AdminFlashSalesOffer extends AdminTab
 								
 							}
 						}
-		echo 		'</ul>
-						<p class="no_items"'.(count($images) != 0 ? 'style="display: none"' : '').'>'. $this->l('No product selected') .'</p>';
+		echo 		'</ul>';
 		echo '</fieldset>';
 		echo '	<p class="clear"></p>';
 		// SEO

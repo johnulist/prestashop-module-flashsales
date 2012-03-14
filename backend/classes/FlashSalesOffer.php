@@ -58,8 +58,8 @@ class FlashSalesOffer extends ObjectModel
 		parent::__construct($id_flashsales_offer, $id_lang);
 		if(!$id_lang)
 			$id_lang = Configuration::get('PS_LANG_DEFAULT');
-		$this->products = self::getProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $id_flashsales_offer);
-		$this->images = self::getImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $id_flashsales_offer);
+		//$this->products = self::getProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $id_flashsales_offer);
+		//$this->images = self::getImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $id_flashsales_offer);
 	}
 	public function getFields()
 	{
@@ -120,8 +120,13 @@ class FlashSalesOffer extends ObjectModel
 		}
 		return $fields;
 	}
-	
-	public static function getProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false)
+
+	public function getProducts($id_lang, $id_category = false)
+	{
+		
+	}
+
+	public static function getAllProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false)
 	{
 		$all_products = Product::getProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_category = false, $only_active = false);
 
@@ -144,12 +149,12 @@ class FlashSalesOffer extends ObjectModel
 		return $all_products;
 	}
 
-	public static function getImages($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false)
+	public static function getAllImages($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false)
 	{
 		if($id_flashsales_offer)
 			$flashsales_images = Db::getInstance()->ExecuteS('SELECT foi.`id_image` FROM `'._DB_PREFIX_.'flashsales_offer_image` foi WHERE foi.`id_flashsales_offer` = ' . (int)$id_flashsales_offer);
 
-		$all_products = self::getProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false);
+		$all_products = self::getAllProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false);
 		$images = array();
 		foreach($all_products AS $fproduct)
 		{
@@ -194,22 +199,6 @@ class FlashSalesOffer extends ObjectModel
 		return $images;
 	}
 
-	private static function _rec_in_array($needle, $haystack, $alsokeys=false)
-	{
-		if(!is_array($haystack))
-			return false;
-
-		if(in_array($needle, $haystack) || ($alsokeys && in_array($needle, array_keys($haystack))))
-			return true;
-		else
-		{
-			foreach($haystack AS $element)
-				$ret = self::_rec_in_array($needle, $element, $alsokeys);
-		}
-
-		return $ret;
-	}
-	
 	public static function distinctMultiDimensionalArray($array, $keySearch, $overwrite = false, $exception = array())
 	{
 		// Check if it's an array
