@@ -31,7 +31,7 @@ class AdminFlashSalesOffer extends AdminTab
 		);
 
 		//$this->_select	 = '';
-		$this->_where		 = 'AND a.`date_end` > CURRENT_DATE()';
+		$this->_where		 = 'AND a.`date_start` > CURRENT_DATE()';
 		//$this->_group		 = '';
 		//$this->_having	 = '';
 		//$this->_filter	 = '';
@@ -64,6 +64,7 @@ class AdminFlashSalesOffer extends AdminTab
 		<form action="'.$currentIndex.'&submitAdd'.$this->table.'=1&token='.($token!=NULL ? $token : $this->token).'" method="post" enctype="multipart/form-data">
 		'.($obj->id ? '<input type="hidden" name="id_'.$this->table.'" value="'.$obj->id.'" />' : '').'
 			<fieldset><legend><img src="../img/admin/tab-categories.gif" />'.$this->l('Flash sales offer').'</legend>
+			'.(isset($_GET['flashsales_old']) ? '<input type="hidden" name="flashsales_old" value="1"' : '').'
 				<label>'.$this->l('Name:').' </label>
 				<div class="margin-form translatable">';
 		foreach ($this->_languages as $language)
@@ -314,7 +315,7 @@ class AdminFlashSalesOffer extends AdminTab
 				$this->_errors[] = Tools::displayError('You need to select the default picture of the offer');
 			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) != Configuration::get('FS_NB_PICTURES'))
 				$this->_errors[] = Tools::displayError('You have to select') . ' ' . Configuration::get('FS_NB_PICTURES') . ' ' . Tools::displayError('images');
-			elseif(strtotime(Tools::getValue('date_start')) < strtotime(date('Y-m-d')) + Configuration::get('FS_TIME_BETWEEN_PERIOD'))
+			elseif(strtotime(Tools::getValue('date_start')) < strtotime(date('Y-m-d')) + Configuration::get('FS_TIME_BETWEEN_PERIOD') && !isset($_POST['flashsales_old']))
 				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');
 			elseif(FlashSalesOffer::getNumberOffersForTheDay(Tools::getValue('date_start') >= Configuration::get('FS_NB_OFFERS')) && !$id_flashsales_offer)
 				$this->_errors[] = Tools::displayError('You cannot add offer for this date, there are too much (max:') . ' ' . Configuration::get('FS_NB_OFFERS') . ')';
