@@ -116,13 +116,15 @@ class FlashSalesOffer extends ObjectModel
 		if($id_flashsales_offer)
 		{
 			$flashsales_products = Db::getInstance()->ExecuteS('SELECT fp.`id_product` FROM `'._DB_PREFIX_.'flashsales_product` fp WHERE fp.`id_flashsales_offer` = ' . (int)$id_flashsales_offer);
-			//die(print_r($flashsales_products));
-			foreach($all_products AS &$product)
+			if(!empty($flashsales_products))
 			{
-				if(self::_rec_in_array($product['id_product'], $flashsales_products))
-					$product['checked'] = 1;
-				else
-					$product['checked'] = 0;
+				foreach($all_products AS &$product)
+				{
+					if(self::_rec_in_array($product['id_product'], $flashsales_products))
+						$product['checked'] = 1;
+					else
+						$product['checked'] = 0;
+				}
 			}
 		}
 
