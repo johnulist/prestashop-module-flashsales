@@ -183,7 +183,7 @@ class FlashSalesOffer extends ObjectModel
 				);
 			}
 		}
-		$images = self::distinctMultiDimensionalArray($images, 'id_image', true);
+		$images = self::_distinctMultiDimensionalArray($images, 'id_image', true);
 		if(isset($flashsales_images))
 		{
 			foreach($flashsales_images AS $fimage)
@@ -199,7 +199,13 @@ class FlashSalesOffer extends ObjectModel
 		return $images;
 	}
 
-	public static function distinctMultiDimensionalArray($array, $keySearch, $overwrite = false, $exception = array())
+	public static function getNumberOffersForTheDay($date_start)
+	{
+		$result = Db::getInstance()->getRow('SELECT COUNT(f.`id_flashsales_offer`) AS `number` FROM `'._DB_PREFIX_.'flashsales_offer` f WHERE f.`date_start` = \'' . $date_start . '\'');
+		return $result['number'];
+	}
+
+	private static function _distinctMultiDimensionalArray($array, $keySearch, $overwrite = false, $exception = array())
 	{
 		// Check if it's an array
 		if( !is_array($array) )

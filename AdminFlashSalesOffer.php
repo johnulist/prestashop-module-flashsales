@@ -53,7 +53,6 @@ class AdminFlashSalesOffer extends AdminTab
 		$all_products = FlashSalesOffer::getAllProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
 		$all_images =  FlashSalesOffer::getAllImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
 		$currency = new Currency(Configuration::get('PS_CURRENCY_DEFAULT'));
-		//die(print_r($all_products));
 		echo '<link rel="stylesheet" href="../modules/' . strtolower($this->_module) . '/backend/css/' . strtolower($this->_module) . '.backend.admin.style.css">';
 		echo '<script src="../modules/' . strtolower($this->_module) . '/backend/js/' . strtolower($this->_module) . '.backend.admin.script.js"></script>';
 		echo '<script type="text/javascript">';
@@ -306,6 +305,8 @@ class AdminFlashSalesOffer extends AdminTab
 			//die(print_r($_POST));
 			parent::validateRules();
 
+			$id_flashsales_offer = (int)(Tools::getValue('id_flashsales_offer'));
+
 			if(!isset($_POST['flashsales_productBox']) || empty($_POST['flashsales_productBox']))
 				$this->_errors[] = Tools::displayError('You need to select products which you want in your offer');
 
@@ -313,14 +314,15 @@ class AdminFlashSalesOffer extends AdminTab
 				$this->_errors[] = Tools::displayError('You need to select the default picture of the offer');
 			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) != Configuration::get('FS_NB_PICTURES'))
 				$this->_errors[] = Tools::displayError('You have to select') . ' ' . Configuration::get('FS_NB_PICTURES') . ' ' . Tools::displayError('images');
-
-			if(strtotime(Tools::getValue('date_start')) < strtotime(date('Y-m-d')) + Configuration::get('FS_TIME_BETWEEN_PERIOD'))
+			elseif(strtotime(Tools::getValue('date_start')) < strtotime(date('Y-m-d')) + Configuration::get('FS_TIME_BETWEEN_PERIOD'))
 				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');
+			elseif(FlashSalesOffer::getNumberOffersForTheDay(Tools::getValue('date_start') >= Configuration::get('FS_NB_OFFERS')) && !$id_flashsales_offer)
+				$this->_errors[] = Tools::displayError('You cannot add offer for this date, there are too much (max:') . ' ' . Configuration::get('FS_NB_OFFERS') . ')';
 
 			if (!sizeof($this->_errors))
 			{
 				// ADD NEW ONE
-				if (!$id_flashsales_offer = (int)(Tools::getValue('id_flashsales_offer')))
+				if (!$id_flashsales_offer)
 				{
 					$flashsales_offer = new FlashSalesOffer();
 					$this->copyFromPost($flashsales_offer, 'flashsales_offer');
@@ -365,7 +367,47 @@ class AdminFlashSalesOffer extends AdminTab
 				// EDIT
 				else
 				{
-					
+					$flashsales_offer = new FlashSalesOffer($id_flashsales_offer);
+					$this->copyFromPost($flashsales_offer, 'flashsales_offer');
+					$flashsales_offer->date_end = date('Y-m-d', strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD'));
+					if (!$flashsales_offer->update())
+						$this->_errors[] = Tools::displayError('An error occurred while updating object.').' <b>'.$this->table.' ('.mysql_error().')</b>';
+					else
+					{
+						// Offer products
+						$flashsales_offer_products = Tools::getValue('flashsales_productBox');
+						$products = '';
+						foreach($flashsales_offer_products AS $k => $id_product)
+						{
+							$products .= "('" . $flashsales_offer->id . "', '" . $id_product . "', NOW(), NOW())";
+							if($k + 1 != count($flashsales_offer_products))
+								$products .= ', ';
+						}
+
+						// Offer images
+						$flashsales_offer_images = Tools::getValue('flashsales_offer_image');
+						$images = '';
+						foreach($flashsales_offer_images AS $k => $id_image)
+						{
+							if($k <= Configuration::get('FS_NB_PICTURES') - 1)
+							{
+								// Prepare query
+								$images .= "('" . $flashsales_offer->id . "', '" . $id_image . "', '" . $k . "', NOW(), NOW())";
+								if($k + 1 != count($flashsales_offer_images))
+									$images .= ', ';
+							}
+						}
+						if(!Db::getInstance()->Execute("DELETE FROM `" . _DB_PREFIX_ . "flashsales_product` WHERE `id_flashsales_offer` = " . $flashsales_offer->id))
+							$this->_errors[] = Tools::displayError('An error occurred while deleting offer products.');
+						elseif(!Db::getInstance()->Execute("DELETE FROM `" . _DB_PREFIX_ . "flashsales_offer_image` WHERE `id_flashsales_offer` = " . $flashsales_offer->id))
+							$this->_errors[] = Tools::displayError('An error occurred while deleting offer images.');
+						elseif(!Db::getInstance()->Execute("INSERT INTO  `" . _DB_PREFIX_ . "flashsales_product` VALUES " . $products))
+							$this->_errors[] = Tools::displayError('An error occurred while inserting offer products.');
+						elseif(!Db::getInstance()->Execute("INSERT INTO  `" . _DB_PREFIX_ . "flashsales_offer_image` VALUES " . $images))
+							$this->_errors[] = Tools::displayError('An error occurred while inserting offer images.');
+						else
+							Tools::redirectAdmin($currentIndex.'&id_flashsales_category='.$flashsales_offer->id_flashsales_category.'&conf=4&token='.Tools::getAdminTokenLite('AdminFlashSalesContent'));
+					}
 				}
 			}
 		}
