@@ -472,6 +472,26 @@ class AdminFlashSalesOffer extends AdminTab
 			else
 				Tools::redirectAdmin($currentIndex.'&'.$this->table.'Orderby=position&'.$this->table.'Orderway=asc&conf=4'.(($id_category = (int)(Tools::getValue('id_flashsales_category'))) ? ('&id_flashsales_category='.$id_category) : '').'&token='.Tools::getAdminTokenLite('AdminFlashSalesContent'));
 		}
+		// ENABLED / DISABLED
+		elseif (Tools::isSubmit('status') AND Tools::isSubmit($this->identifier))
+		{
+			if ($this->tabAccess['edit'] === '1')
+			{
+				if (Validate::isLoadedObject($object = $this->loadObject()))
+				{
+					if ($object->toggleStatus())
+						Tools::redirectAdmin($currentIndex.'&conf=5'.((int)Tools::getValue('id_flashsales_category') ? '&id_flashsales_category='.(int)Tools::getValue('id_flashsales_category') : '').'&token='.Tools::getValue('token'));
+					else
+						$this->_errors[] = Tools::displayError('An error occurred while updating status.');
+				}
+				else
+					$this->_errors[] = Tools::displayError('An error occurred while updating status for object.').' <b>'.$this->table.'</b> '.Tools::displayError('(cannot load object)');
+			}
+			else
+				$this->_errors[] = Tools::displayError('You do not have permission to edit here.');
+		}
+		else
+			parent::postProcess(true);
 	}
 }
 ?>
