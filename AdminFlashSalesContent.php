@@ -4,11 +4,15 @@ include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesOffer.php';
 include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesCategory.php';
 include_once(_PS_MODULE_DIR_ . 'flashsales/AdminFlashSalesCategories.php');
 include_once(_PS_MODULE_DIR_ . 'flashsales/AdminFlashSalesOffer.php');
+include_once(_PS_MODULE_DIR_ . 'flashsales/AdminFlashSalesOfferOfTheDay.php');
+include_once(_PS_MODULE_DIR_ . 'flashsales/AdminFlashSalesOfferOld.php');
 
 class AdminFlashSalesContent extends AdminTab
 {
 	private $adminFlashSalesCategories;
 	private $adminFlashSalesOffer;
+	private $adminFlashSalesOfferOfTheDay;
+	private $adminFlashSalesOfferOld;
 
 	private static $_category;
 
@@ -23,6 +27,8 @@ class AdminFlashSalesContent extends AdminTab
 		$this->table = array('flashsales_category', 'flashsales_offer');
 		$this->adminFlashSalesCategories = new adminFlashSalesCategories();
 		$this->adminFlashSalesOffer = new adminFlashSalesOffer();
+		$this->adminFlashSalesOfferOfTheDay = new adminFlashSalesOfferOfTheDay();
+		$this->adminFlashSalesOfferOld = new adminFlashSalesOfferOld();
 
 		parent::__construct();
 	}
@@ -78,8 +84,14 @@ class AdminFlashSalesContent extends AdminTab
 			$id_flashsales_category = 1;
 		$flashsales_tabs = array('flashsales_category', 'flashsales_offer');
 		//echo '<div class="cat_bar"><span style="color: #3C8534;">'.$this->l('Current flash sales category').' :</span>&nbsp;&nbsp;&nbsp;'.getPath($catBarIndex, $id_flashsales_category,'','','flashsales_offer').'</div>';
-		echo '<h2>'.$this->l('Flashsales of the moment').'</h2>';
+		echo '<h2>'.$this->l('Flashsales of the day').'</h2>';
+		$this->adminFlashSalesOfferOfTheDay->display($this->token);
+		echo '<div style="margin:10px">&nbsp;</div>';
+		echo '<h2>'.$this->l('Next flashsales').'</h2>';
 		$this->adminFlashSalesOffer->display($this->token);
+		echo '<div style="margin:10px">&nbsp;</div>';
+		echo '<h2>'.$this->l('Old flashsales').'</h2>';
+		$this->adminFlashSalesOfferOld->display($this->token);
 		echo '<div style="margin:10px">&nbsp;</div>';
 		echo '<h2>'.$this->l('Flashsales categories').'</h2>';
 		$this->adminFlashSalesCategories->display($this->token);

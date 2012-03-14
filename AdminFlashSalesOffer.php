@@ -32,7 +32,7 @@ class AdminFlashSalesOffer extends AdminTab
 
 		//$this->_select	 = '';
 		//$this->_join		 = '';
-		//$this->_where		 = '';
+		$this->_where		 = 'AND a.`date_end` > CURRENT_DATE()';
 		//$this->_group		 = '';
 		//$this->_having	 = '';
 		//$this->_filter	 = '';
@@ -193,6 +193,7 @@ class AdminFlashSalesOffer extends AdminTab
 		$images = FlashSalesOffer::getImages($obj->id);
 		echo '<fieldset style="font-size: 1em">
 						<legend><img src="../img/admin/picture.gif">'. $this->l('Offer images') .'</legend>
+						<p>'. $this->l('Select') . ' ' . Configuration::get('FS_NB_PICTURES', 3) . ' ' . $this->l('images you want to display in your offer.').'</p>
 						<ul id="offer_images_container">';
 						if($images)
 						{
