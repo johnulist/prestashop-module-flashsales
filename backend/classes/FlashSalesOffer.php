@@ -146,7 +146,6 @@ class FlashSalesOffer extends ObjectModel
 				FROM '._DB_PREFIX_.'image
 				WHERE id_product = '.(int)($product['id_product']).' AND cover = 1'
 			);
-
 			$images[] = array(
 				'id_product' => $product['id_product'],
 				'id_image' => $image['id_image'],

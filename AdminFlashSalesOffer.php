@@ -191,7 +191,6 @@ class AdminFlashSalesOffer extends AdminTab
 		echo '	<p class="clear"></p>';
 		// OFFER IMAGES
 		$images = FlashSalesOffer::getImages($obj->id);
-		print_r($images);
 		echo '<fieldset style="font-size: 1em">
 						<legend><img src="../img/admin/picture.gif">'. $this->l('Offer images') .'</legend>
 						<ul id="offer_images_container">';
@@ -200,7 +199,11 @@ class AdminFlashSalesOffer extends AdminTab
 							foreach($images AS $image)
 							{
 								$imageObj = new Image($image['id_image']);
+								echo '<li class="flashsales_offer_image" id="flashsales_offer_image_' . $image['id_product'] . '">';
 								echo cacheImage(_PS_IMG_DIR_.'p/'.$imageObj->getExistingImgPath().'.jpg', 'product_mini_flashsales_'.(int)($image['id_product']).(isset($image['product_attribute_id']) ? '_'.(int)($image['product_attribute_id']) : '').'.jpg', 80, 'jpg');
+								echo '<input type="checkbox" class="checkbox_offer_image" name="flashsales_offer_image[]" value="' . $image['id_product'] . '" '. ($image['checked'] ? 'checked="checked"' : '') .' />';
+								echo '</li>';
+								
 							}
 						}
 		echo 		'</ul>
