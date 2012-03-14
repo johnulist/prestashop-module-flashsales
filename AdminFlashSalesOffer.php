@@ -428,6 +428,38 @@ class AdminFlashSalesOffer extends AdminTab
 					Tools::redirectAdmin($currentIndex.'&id_flashsales_category='.$flashsales_offer->id_flashsales_category.'&conf=1&token='.Tools::getAdminTokenLite('AdminFlashSalesContent'));
 			}
 		}
+		// DELETE MULTIPLE
+		elseif (Tools::getValue('submitDel'.$this->table))
+		{
+			if ($this->tabAccess['delete'] === '1')
+			{
+				if (isset($_POST[$this->table.'Box']))
+				{
+					$flashsales_offer = new FlashSalesOffer();
+					$result = true;
+					$result = $flashsales_offer->deleteSelection(Tools::getValue($this->table.'Box'));
+					if ($result)
+					{
+						foreach(Tools::getValue($this->table.'Box') AS $id)
+						{
+							if(!Db::getInstance()->Execute("DELETE FROM `" . _DB_PREFIX_ . "flashsales_product` WHERE `id_flashsales_offer` = " . $id))
+								$this->_errors[] = Tools::displayError('An error occurred while deleting offer products.');
+							elseif(!Db::getInstance()->Execute("DELETE FROM `" . _DB_PREFIX_ . "flashsales_offer_image` WHERE `id_flashsales_offer` = " . $id))
+								$this->_errors[] = Tools::displayError('An error occurred while deleting offer images.');
+						}
+
+						$flashsales_offer->cleanPositions((int)(Tools::getValue('id_flashsales_category')));
+						Tools::redirectAdmin($currentIndex.'&conf=2&token='.Tools::getAdminTokenLite('AdminFlashSalesContent').'&id_flashsales_category='.(int)(Tools::getValue('id_flashsales_category')));
+					}
+					$this->_errors[] = Tools::displayError('An error occurred while deleting selection.');
+
+				}
+				else
+					$this->_errors[] = Tools::displayError('You must select at least one element to delete.');
+			}
+			else
+				$this->_errors[] = Tools::displayError('You do not have permission to delete here.');
+		}
 	}
 }
 ?>
