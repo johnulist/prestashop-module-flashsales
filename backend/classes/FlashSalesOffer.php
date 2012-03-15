@@ -253,6 +253,64 @@ class FlashSalesOffer extends ObjectModel
 			AND `id_flashsales_category`='.(int)($movedFlashsales['id_flashsales_category'])));
 	}
 
+	public static function updateDefault($id_flashsales_offer, $date_start)
+	{
+		$result = Db::getInstance()->ExecuteS('
+		SELECT `id_flashsales_offer`
+		FROM `'._DB_PREFIX_.'flashsales_offer`
+		WHERE `date_start` = \''.$date_start.'\'
+		AND `id_flashsales_offer` != '.(int)($id_flashsales_offer).'
+		ORDER BY `position`');
+
+		$sizeof = sizeof($result);
+		for ($i = 0; $i < $sizeof; ++$i){
+				$sql = '
+				UPDATE `'._DB_PREFIX_.'flashsales_offer`
+				SET `default` = 0
+				WHERE `date_start` = \''.$date_start.'\'
+				AND `id_flashsales_offer` = '.(int)($result[$i]['id_flashsales_offer']);
+				Db::getInstance()->Execute($sql);
+			}
+		return true;
+	}
+
+	public static function cleanDefault($id_flashsales_offer)
+	{
+		if(is_array($id_flashsales_offer))
+			$id_flashsales_offer_temp = $id_flashsales_offer[0];
+		else
+			$id_flashsales_offer_temp = $id_flashsales_offer;
+
+		$date_start = Db::getInstance()->getRow('
+		SELECT `date_start`
+		FROM `'._DB_PREFIX_.'flashsales_offer`
+		WHERE `id_flashsales_offer` = '.(int)$id_flashsales_offer_temp);
+		$date_start = $date_start['date_start'];
+
+		if(is_array($id_flashsales_offer))
+			$id_flashsales_offer = implode(', ', $id_flashsales_offer);
+
+		$default = Db::getInstance()->getRow('
+		SELECT COUNT(`id_flashsales_offer`) AS `default`
+		FROM `'._DB_PREFIX_.'flashsales_offer`
+		WHERE `date_start` = \''.$date_start.'\'
+		AND `default` = 1
+		AND `id_flashsales_offer` NOT IN ('. $id_flashsales_offer .')');
+		$default = $default['default'];
+		if(!$default)
+		{
+			$sql = '
+				UPDATE `'._DB_PREFIX_.'flashsales_offer`
+				SET `default` = 1
+				WHERE `date_start` = \''.$date_start.'\'
+				AND `id_flashsales_offer` NOT IN ('. $id_flashsales_offer .')
+				ORDER BY `position`
+				LIMIT 1';
+			Db::getInstance()->Execute($sql);
+		}
+		return true;
+	}
+
 	public static function cleanPositions($id_category)
 	{
 		$result = Db::getInstance()->ExecuteS('

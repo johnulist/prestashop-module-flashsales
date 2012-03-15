@@ -27,6 +27,7 @@ class AdminFlashSalesOffer extends AdminTab
 			'date_start' => array('title' => $this->l('Date start'), 'width' => 35, 'align' => 'right', 'type' => 'date', 'filter_key' => 'a!date_start'),
 			'date_end' => array('title' => $this->l('Date end'), 'width' => 35, 'align' => 'right', 'type' => 'date', 'filter_key' => 'a!date_end'),
 			'position' => array('title' => $this->l('Position'), 'width' => 40,'filter_key' => 'position', 'align' => 'center', 'position' => 'position'),
+			'default' => array('title' => $this->l('Default'), 'width' => 25, 'align' => 'center', 'type' => 'bool', 'orderby' => false),
 			'active' => array('title' => $this->l('Enabled'), 'width' => 25, 'align' => 'center', 'active' => 'status', 'type' => 'bool', 'orderby' => false)
 		);
 
@@ -49,6 +50,7 @@ class AdminFlashSalesOffer extends AdminTab
 		if (!($obj = $this->loadObject(true)))
 			return;
 		$active = $this->getFieldValue($obj, 'active');
+		$default = $this->getFieldValue($obj, 'default');
 		$id_lang = (int)$cookie->id_lang;
 		$all_products = FlashSalesOffer::getAllProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
 		$all_images =  FlashSalesOffer::getAllImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
@@ -75,6 +77,7 @@ class AdminFlashSalesOffer extends AdminTab
 					</div>';
 		echo '<p class="clear"></p>
 				</div>';
+		// CATEGORY
 			echo '<label>'.$this->l('Flash sales category:').' </label>
 					<div class="margin-form">
 						<select name="id_flashsales_category">';
@@ -82,6 +85,14 @@ class AdminFlashSalesOffer extends AdminTab
 			FlashSalesCategory::recurseFlashSalesCategory($categories, $categories[0][1], 1, $this->getFieldValue($obj, 'id_flashsales_category'));
 			echo '
 						</select>
+					</div>';
+		// DEFAULT
+		echo '<label>'.$this->l('Use this offer as default:').' </label>';
+		echo '<div class="margin-form">
+						<input type="radio" name="default" id="default_on" value="1" '.($default ? 'checked="checked" ' : '').'/>
+						<label class="t" for="default_on"><img src="../img/admin/enabled.gif" alt="'.$this->l('Enabled').'" title="'.$this->l('Enabled').'" /></label>
+						<input type="radio" name="default" id="default_off" value="0" '.(!$default ? 'checked="checked" ' : '').'/>
+						<label class="t" for="default_off"><img src="../img/admin/disabled.gif" alt="'.$this->l('Disabled').'" title="'.$this->l('Disabled').'" /></label>
 					</div>';
 		// VIDEO
 		if(Configuration::get('FS_USE_VIDEO'))
@@ -329,10 +340,15 @@ class AdminFlashSalesOffer extends AdminTab
 					$this->copyFromPost($flashsales_offer, 'flashsales_offer');
 					// Date end
 					$flashsales_offer->date_end = date('Y-m-d', strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD'));
+
 					if (!$flashsales_offer->add())
 						$this->_errors[] = Tools::displayError('An error occurred while creating object.').' <b>'.$this->table.' ('.mysql_error().')</b>';
 					else
 					{
+						// Update default
+						if($flashsales_offer->default)
+							FlashSalesOffer::updateDefault($flashsales_offer->id, $flashsales_offer->date_start);
+
 						// Offer products
 						$flashsales_offer_products = Tools::getValue('flashsales_productBox');
 						$products = '';
@@ -375,6 +391,10 @@ class AdminFlashSalesOffer extends AdminTab
 						$this->_errors[] = Tools::displayError('An error occurred while updating object.').' <b>'.$this->table.' ('.mysql_error().')</b>';
 					else
 					{
+						// Update default
+						if($flashsales_offer->default)
+							FlashSalesOffer::updateDefault($flashsales_offer->id, $flashsales_offer->date_start);
+
 						// Offer products
 						$flashsales_offer_products = Tools::getValue('flashsales_productBox');
 						$products = '';
@@ -416,6 +436,12 @@ class AdminFlashSalesOffer extends AdminTab
 		elseif (Tools::isSubmit('deleteflashsales_offer'))
 		{
 			$flashsales_offer = new FlashSalesOffer((int)(Tools::getValue('id_flashsales_offer')));
+			if($flashsales_offer->id)
+			{
+				// Clean default
+				FlashSalesOffer::cleanDefault($flashsales_offer->id);
+			}
+			// Clean positions
 			$flashsales_offer->cleanPositions($flashsales_offer->id_flashsales_category);
 			if (!$flashsales_offer->delete())
 				$this->_errors[] = Tools::displayError('An error occurred while deleting object.').' <b>'.$this->table.' ('.mysql_error().')</b>';
@@ -437,11 +463,15 @@ class AdminFlashSalesOffer extends AdminTab
 				if (isset($_POST[$this->table.'Box']))
 				{
 					$flashsales_offer = new FlashSalesOffer();
+					$array = Tools::getValue($this->table.'Box');
+					// Clean default
+					FlashSalesOffer::cleanDefault($array);
+
 					$result = true;
-					$result = $flashsales_offer->deleteSelection(Tools::getValue($this->table.'Box'));
+					$result = $flashsales_offer->deleteSelection($array);
 					if ($result)
 					{
-						foreach(Tools::getValue($this->table.'Box') AS $id)
+						foreach($array AS $id)
 						{
 							if(!Db::getInstance()->Execute("DELETE FROM `" . _DB_PREFIX_ . "flashsales_product` WHERE `id_flashsales_offer` = " . $id))
 								$this->_errors[] = Tools::displayError('An error occurred while deleting offer products.');
