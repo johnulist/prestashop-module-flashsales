@@ -295,6 +295,18 @@ class AdminFlashSalesOffer extends AdminTab
 	{
 		global $currentIndex, $cookie;
 
+		if(FlashSalesOffer::getNumberOffersForTheDay(date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'))) < Configuration::get('FS_NB_OFFERS'))
+		{
+			echo '<div class="warn">
+							<span style="float:right">
+								<a id="hideWarn" href="">
+									<img alt="X" src="../img/admin/close.png" />
+								</a>
+							</span>
+							<img src="../img/admin/warn2.png" />';
+			echo $this->l('Offers are missing for the next period: need') . ' ' . (string)((int)Configuration::get('FS_NB_OFFERS') - (int)FlashSalesOffer::getNumberOffersForTheDay(date('Y-m-d', Configuration::get('FS_NEXT_PERIOD')))) . ' ' . $this->l('others') . '
+						</div>';
+		}
 		if (($id_flashsales_category = (int)Tools::getValue('id_flashsales_category')))
 			$currentIndex .= '&id_flashsales_category='.$id_flashsales_category;
 		$this->getList((int)($cookie->id_lang), !$cookie->__get($this->table.'Orderby') ? 'position' : NULL, !$cookie->__get($this->table.'Orderway') ? 'ASC' : NULL);
@@ -328,7 +340,7 @@ class AdminFlashSalesOffer extends AdminTab
 				$this->_errors[] = Tools::displayError('You have to select') . ' ' . Configuration::get('FS_NB_PICTURES') . ' ' . Tools::displayError('images');
 			elseif(strtotime(Tools::getValue('date_start')) < strtotime(date('Y-m-d')) + Configuration::get('FS_TIME_BETWEEN_PERIOD') && !isset($_POST['flashsales_old']))
 				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');
-			elseif(FlashSalesOffer::getNumberOffersForTheDay(Tools::getValue('date_start') >= Configuration::get('FS_NB_OFFERS')) && !$id_flashsales_offer)
+			elseif(FlashSalesOffer::getNumberOffersForTheDay(Tools::getValue('date_start')) >= Configuration::get('FS_NB_OFFERS') && !$id_flashsales_offer)
 				$this->_errors[] = Tools::displayError('You cannot add offer for this date, there are too much (max:') . ' ' . Configuration::get('FS_NB_OFFERS') . ')';
 
 			if (!sizeof($this->_errors))
@@ -490,6 +502,37 @@ class AdminFlashSalesOffer extends AdminTab
 			}
 			else
 				$this->_errors[] = Tools::displayError('You do not have permission to delete here.');
+		}
+		// EXTEND
+		elseif (Tools::getValue('submitExtend'.$this->table))
+		{
+			//die(print_r($_POST));
+			if (isset($_POST[$this->table.'Box']))
+			{
+				$array = Tools::getValue($this->table.'Box');
+				$flashsales_offer = new FlashSalesOffer($array[0]);
+
+				if(count($array) > Configuration::get('FS_NB_OFFERS'))
+				{
+					$result = false;
+					$this->_errors[] = Tools::displayError('You cannot extend more than allowed');
+				}
+				else
+					$result = true;
+
+				if ($result)
+					$result = $flashsales_offer->extendSelection($array);
+
+				if ($result === true)
+					Tools::redirectAdmin($currentIndex.'&conf=4&token='.Tools::getAdminTokenLite('AdminFlashSalesContent').'&id_flashsales_category='. $flashsales_offer->id_flashsales_category);
+				elseif(is_array($result))
+					$this->_errors = array_merge($this->_errors, $result);
+				else
+				$this->_errors[] = Tools::displayError('An error occurred while extending selection.');
+
+			}
+			else
+				$this->_errors[] = Tools::displayError('You must select at least one element to extend.');
 		}
 		// POSITION
 		elseif (Tools::getValue('position'))

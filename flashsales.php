@@ -2,7 +2,7 @@
 if (!defined('_PS_VERSION_'))
 	exit;
 
-//include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/Flashsales.php';
+include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesOffer.php';
 
 class FlashSales extends Module
 {
@@ -368,6 +368,12 @@ class FlashSales extends Module
 				'name'			=> strtolower($this->name) . '_next_period',
 				'type'		=> false, // boolean, text, radio, select, checkbox or false
 				'default' => strtotime('midnight') + self::_daysToSeconds(1) + 36000
+			),
+			6 => array(
+				'config_name' => $this->_abbreviation . '_SECURE_KEY',
+				'name' => strtolower($this->name) . '_secure_key',
+				'type'	=> false,
+				'default' => strtoupper(Tools::passwdGen(16))
 			)
 		);
 
@@ -410,6 +416,7 @@ class FlashSales extends Module
 		$smarty->assign('module_name', strtolower($this->name));
 		$smarty->assign('module_dir', $this->_path);
 		$smarty->assign('configs', $this->_configs);
+		$smarty->assign('cron_url', Tools::getShopDomain(true, true).__PS_BASE_URI__.'modules/flashsales/cron.php?secure_key='.Configuration::get('FS_SECURE_KEY'));
 
 		$smarty->register_function('twoDigits', array('Flashsales', 'twoDigitsSmarty'));
 		$smarty->register_function('secondsToMinutes', array('Flashsales', 'secondsToMinutesSmarty'));
@@ -473,6 +480,53 @@ class FlashSales extends Module
 		return $output;
 	}
 
+	public function cronTask($action)
+	{
+		switch($action)
+		{
+			case 1:
+				// Update next period
+				Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', strtotime('midnight') + self::_daysToSeconds(1) + 36000);
+				// Check if all offers for the day
+				$nextPeriod = date('Y-m-d', Configuration::get($this->_abbreviation . '_NEXT_PERIOD'));
+				$nbOffersOfTheDay = FlashsalesOffer::getNumberOffersForTheDay($nextPeriod);
+				$nbOffersNeeded = Configuration::get($this->_abbreviation . '_NB_OFFERS');
+				if($nbOffersOfTheDay < $nbOffersNeeded)
+				{
+					// Get offers best demand
+					$nbOffersMissing = $nbOffersNeeded - $nbOffersOfTheDay;
+					$sql = 'SELECT fo.`id_flashsales_offer`, COUNT(fom.`id_flashsales_offer`) AS `nb_demand`
+					FROM `'._DB_PREFIX_.'flashsales_offer` fo
+					LEFT JOIN `'._DB_PREFIX_.'flashsales_offer_mailalert` fom ON (fom.`id_flashsales_offer` = fo.`id_flashsales_offer`)
+					WHERE fo.`date_start` != '. $nextPeriod .'
+					ORDER by `nb_demand`
+					LIMIT ' . (int)$nbOffersMissing;
+
+					$results = Db::getInstance()->ExecuteS($sql);
+					foreach($results AS $result)
+					{
+						$flashsales_offer = new FlashsalesOffer($result['id_flashsales_offer']);
+						$flashsales_offer->date_start = $nextPeriod;
+						$flashsales_offer->date_end		= $nextPeriod + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD');
+						$flashsales_offer->update();
+					}
+				}
+				break;
+			case 2:
+				// Disable products & disable offers.
+				if(time() >= Configuration::get($this->_abbreviation . '_NEXT_PERIOD'))
+				{
+					$nextPeriod = date('Y-m-d', Configuration::get($this->_abbreviation . '_NEXT_PERIOD'));
+					$sql = 'UPDATE SET fo.`active` = 0
+									FROM `'._DB_PREFIX_.'flashsales_offer` fo
+									WHERE fo.`date_end` = ' . $nextPeriod;
+					Db::getInstance()->Execute($sql);
+					// Clear cache ?
+				}
+				break;
+		}
+	}
+
 	// ---------------------------
 	// --------- HOOKS -----------
 	// ---------------------------
@@ -503,7 +557,8 @@ class FlashSales extends Module
 		global $smarty, $cookie;
 
 		$vars = array(
-			'module_name' => strtoupper($this->name)
+			'module_name' => strtoupper($this->name),
+			'products' => FlashsalesOffer::getOffersForTheDay(date('Y-m-d'), (int)$cookie->id_lang)
 		);
 		$smarty->assign(strtolower($this->name), $vars);
 

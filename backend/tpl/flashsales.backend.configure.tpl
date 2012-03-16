@@ -4,6 +4,12 @@
 <form action="{$action}" method="post" enctype="multipart/form-data">
 	<fieldset>
 		<legend><img src="{$module_dir}/logo.gif" alt="" title="">{l s='Settings' mod=$module_name}</legend>
+		<fieldset style="font-size: 1em; margin-bottom: 1em">
+			<p><b>{l s='Define settings and place this URL in crontab or call it manually daily:' mod=$module_name}</b></p>
+			<ul>
+				<li>{l s='Update next period' mod=$module_name} <b>{$cron_url}&action=1</b></li>
+			</ul>
+		</fieldset>
 		{foreach from=$configs item=config name=configLoop}
 			<label for="{$config.name}">{$config.title}</label>
 			<div class="margin-form">

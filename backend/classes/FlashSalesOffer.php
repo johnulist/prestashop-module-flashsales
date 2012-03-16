@@ -58,8 +58,8 @@ class FlashSalesOffer extends ObjectModel
 		parent::__construct($id_flashsales_offer, $id_lang);
 		if(!$id_lang)
 			$id_lang = Configuration::get('PS_LANG_DEFAULT');
-		//$this->products = self::getProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $id_flashsales_offer);
-		//$this->images = self::getImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $id_flashsales_offer);
+		$this->products = $this->getProducts($id_lang);
+		$this->images		= $this->getImages($id_lang);
 	}
 	public function getFields()
 	{
@@ -136,14 +136,29 @@ class FlashSalesOffer extends ObjectModel
 
 	public function delete()
 	{
-	 	if (parent::delete())
+		if (parent::delete())
 			return $this->cleanPositions($this->id_flashsales_category);
 		return false;
 	}
 
-	public function getProducts($id_lang, $id_category = false)
+	public function getProducts($id_lang)
 	{
-		
+		$results = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` WHERE `id_flashsales_offer` = ' . $this->id);
+		$products = array();
+		foreach($results AS $result)
+			$products[] = new Product($result['id_product'], $id_lang);
+
+		return $products;
+	}
+
+	public function getImages($id_lang)
+	{
+		$results = Db::getInstance()->ExecuteS('SELECT `id_image` FROM `'._DB_PREFIX_.'flashsales_offer_image` WHERE `id_flashsales_offer` = ' . $this->id);
+		$images = array();
+		foreach($results AS $result)
+			$images[] = $result['id_image'];
+
+		return $images;
 	}
 
 	public static function getAllProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false)
@@ -217,6 +232,59 @@ class FlashSalesOffer extends ObjectModel
 		}
 
 		return $images;
+	}
+
+	public function extendSelection($selection)
+	{
+		if (!is_array($selection) OR !Validate::isTableOrIdentifier($this->identifier) OR !Validate::isTableOrIdentifier($this->table))
+			die(Tools::displayError());
+		$result = true;
+		$this->id = (int)($selection[0]);
+		$date_end = $this->date_end;
+		$nbOffersForTheDay = self::getNumberOffersForTheDay($date_end); // 1
+		$nbOffersToExtend	 = count($selection); // 1
+		$nbOffers = Configuration::get('FS_NB_OFFERS'); // 4
+		$nbOffersPossible = $nbOffers - $nbOffersForTheDay; // 3
+
+		if($nbOffersToExtend > $nbOffersPossible)
+		{
+			// DELETE OFFERS
+			$sql = '
+			DELETE fo2, fol, foi, fp, fom
+			FROM (SELECT `id_flashsales_offer` FROM `'._DB_PREFIX_.'flashsales_offer`
+						WHERE `date_start` = \''. $date_end .'\'
+						ORDER BY `position` DESC
+						LIMIT ' . $nbOffersToExtend .') AS fo
+			LEFT JOIN `'._DB_PREFIX_.'flashsales_offer` fo2 ON (fo2.`id_flashsales_offer` = fo.`id_flashsales_offer`)
+			LEFT JOIN `'._DB_PREFIX_.'flashsales_offer_lang` fol ON (fol.`id_flashsales_offer` = fo.`id_flashsales_offer`)
+			LEFT JOIN `'._DB_PREFIX_.'flashsales_offer_image` foi ON (foi.`id_flashsales_offer` = fo.`id_flashsales_offer`)
+			LEFT JOIN `'._DB_PREFIX_.'flashsales_product` fp ON (fp.`id_flashsales_offer` = fo.`id_flashsales_offer`)
+			LEFT JOIN `'._DB_PREFIX_.'flashsales_offer_mailalert` fom ON (fom.`id_flashsales_offer` = fo.`id_flashsales_offer`)';
+			
+			if(!Db::getInstance()->Execute($sql))
+				$result = false;
+		}
+
+		if($result)
+		{
+			// EXTEND OFFERS
+			$errors = array();
+			foreach ($selection AS $id)
+			{
+				$this->id = (int)($id);
+				if(strtotime($this->date_end) - strtotime($this->date_start) + Configuration::get('FS_TIME_BETWEEN_PERIOD') > 2 * Configuration::get('FS_TIME_BETWEEN_PERIOD'))
+					$errors[] = Tools::displayError('Cannot extend offer') . ' "' . $this->id .'"' . Tools::displayError(': it\'s already extend');
+				else
+				{
+					$this->date_end = date('Y-m-d', strtotime($this->date_end) + Configuration::get('FS_TIME_BETWEEN_PERIOD'));
+					if(!$this->update())
+						$result = false;
+				}
+			}
+			if(!empty($errors))
+				return $errors;
+		}
+		return $result;
 	}
 
 	public function updatePosition($way, $position)
@@ -333,6 +401,19 @@ class FlashSalesOffer extends ObjectModel
 	public static function getLastPosition($id_category)
 	{
 		return (Db::getInstance()->getValue('SELECT MAX(position)+1 FROM `'._DB_PREFIX_.'flashsales_offer` WHERE `id_flashsales_category` = '.(int)($id_category)));
+	}
+
+	public static function getOffersForTheDay($date_start, $id_lang)
+	{
+		$results = Db::getInstance()->ExecuteS('SELECT `id_flashsales_offer`
+			FROM `'._DB_PREFIX_.'flashsales_offer`
+			WHERE `date_start` = \'' . $date_start . '\'
+			AND `active` = 1');
+		$offers = array();
+		foreach($results AS $result)
+			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang);
+
+		return $offers;
 	}
 
 	public static function getNumberOffersForTheDay($date_start)
