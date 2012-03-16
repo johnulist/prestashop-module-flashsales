@@ -49,11 +49,12 @@ class AdminFlashSalesOffer extends AdminTab
 
 		if (!($obj = $this->loadObject(true)))
 			return;
+					
 		$active = $this->getFieldValue($obj, 'active');
 		$default = $this->getFieldValue($obj, 'default');
 		$id_lang = (int)$cookie->id_lang;
-		$all_products = FlashSalesOffer::getAllProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
-		$all_images =  FlashSalesOffer::getAllImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id);
+		$all_products = FlashSalesOffer::getAllProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id, (isset($_POST['flashsales_productBox']) ? Tools::getValue('flashsales_productBox') : false));
+		$all_images =  FlashSalesOffer::getAllImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id, (isset($_POST['flashsales_offer_image']) ? Tools::getValue('flashsales_offer_image') : false));
 		$currency = new Currency(Configuration::get('PS_CURRENCY_DEFAULT'));
 		echo '<link rel="stylesheet" href="../modules/' . strtolower($this->_module) . '/backend/css/' . strtolower($this->_module) . '.backend.admin.style.css">';
 		echo '<script src="../modules/' . strtolower($this->_module) . '/backend/js/' . strtolower($this->_module) . '.backend.admin.script.js"></script>';
