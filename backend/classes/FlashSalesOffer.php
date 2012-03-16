@@ -58,8 +58,11 @@ class FlashSalesOffer extends ObjectModel
 		parent::__construct($id_flashsales_offer, $id_lang);
 		if(!$id_lang)
 			$id_lang = Configuration::get('PS_LANG_DEFAULT');
-		$this->products = $this->getProducts($id_lang);
-		$this->images		= $this->getImages($id_lang);
+		if($this->id)
+		{
+			$this->products = $this->getProducts($id_lang);
+			$this->images		= $this->getImages($id_lang);
+		}
 	}
 	public function getFields()
 	{
@@ -146,7 +149,7 @@ class FlashSalesOffer extends ObjectModel
 		$results = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` WHERE `id_flashsales_offer` = ' . $this->id);
 		$products = array();
 		foreach($results AS $result)
-			$products[] = new Product($result['id_product'], $id_lang);
+			$products[] = new Product($result['id_product'], false, $id_lang);
 
 		return $products;
 	}
@@ -161,9 +164,22 @@ class FlashSalesOffer extends ObjectModel
 		return $images;
 	}
 
-	public static function getAllProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false)
+	public static function getAllProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $checked = false, $id_category = false, $only_active = false)
 	{
 		$all_products = Product::getProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_category = false, $only_active = false);
+
+		if($checked)
+		{
+			foreach($all_products AS &$product)
+			{
+				foreach($checked AS $check)
+				{
+					if($check == $product['id_product'])
+						$product['flashsales_checked'] = 1;
+				}
+			}
+			return $all_products;
+		}
 
 		if($id_flashsales_offer)
 		{
@@ -184,16 +200,16 @@ class FlashSalesOffer extends ObjectModel
 		return $all_products;
 	}
 
-	public static function getAllImages($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false)
+	public static function getAllImages($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $checked, $id_category = false, $only_active = false)
 	{
 		if($id_flashsales_offer)
 			$flashsales_images = Db::getInstance()->ExecuteS('SELECT foi.`id_image` FROM `'._DB_PREFIX_.'flashsales_offer_image` foi WHERE foi.`id_flashsales_offer` = ' . (int)$id_flashsales_offer);
 
-		$all_products = self::getAllProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $id_category = false, $only_active = false);
+		$all_products = self::getAllProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer, false, $id_category, $only_active);
 		$images = array();
 		foreach($all_products AS $fproduct)
 		{
-			$product = new Product($fproduct['id_product'], $id_lang);
+			$product = new Product($fproduct['id_product'], false, $id_lang);
 			$fimages = $product->getCombinationImages($id_lang);
 			if(!empty($fimages))
 			{
@@ -226,6 +242,17 @@ class FlashSalesOffer extends ObjectModel
 				foreach($images AS &$image)
 				{
 					if($image['id_image'] == $fimage['id_image'])
+						$image['checked'] = 1;
+				}
+			}
+		}
+		elseif(isset($checked))
+		{
+			foreach($checked AS $check)
+			{
+				foreach($images AS &$image)
+				{
+					if($image['id_image'] == $check)
 						$image['checked'] = 1;
 				}
 			}
