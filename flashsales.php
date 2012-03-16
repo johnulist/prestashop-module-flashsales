@@ -6,6 +6,10 @@ include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesOffer.php';
 
 class FlashSales extends Module
 {
+	public static $cacheDirs;
+	public static $cacheFiles;
+	public static $moduleName = 'flashsales';
+
 	public function __construct()
 	{
 		$this->name		 = 'flashsales';
@@ -28,6 +32,19 @@ class FlashSales extends Module
 			3 => 'Flash sales',
 			4 => 'Flash sales',
 			5 => 'Flash sales',
+		);
+
+		self::$cacheDirs = array(
+			_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.'tools'.DIRECTORY_SEPARATOR.'smarty'.DIRECTORY_SEPARATOR.'compile',
+			_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.'tools'.DIRECTORY_SEPARATOR.'smarty'.DIRECTORY_SEPARATOR.'cache',
+			_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.'tools'.DIRECTORY_SEPARATOR.'smarty_v2'.DIRECTORY_SEPARATOR.'cache',
+			_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.'tools'.DIRECTORY_SEPARATOR.'smarty_v2'.DIRECTORY_SEPARATOR.'cache',
+			_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.'tools'.DIRECTORY_SEPARATOR.'cache',
+			_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.'img'.DIRECTORY_SEPARATOR.'tmp'
+		);
+		
+		self::$cacheFiles = array(
+			self::$moduleName . '_home'
 		);
 
 		$this->_tables = array(
@@ -269,8 +286,8 @@ class FlashSales extends Module
 				),
 				'identifiers' => array('id_flashsales_offer', 'id_image')
 			),
-			'flashsales_product_mailalert' => array(
-				'name' => 'flashsales_product_mailalert',
+			'flashsales_offer_mailalert' => array(
+				'name' => 'flashsales_offer_mailalert',
 				'fields' => array(
 					0 => array(
 						'name' 			=> 'id_flashsales_offer',
@@ -374,6 +391,12 @@ class FlashSales extends Module
 				'name' => strtolower($this->name) . '_secure_key',
 				'type'	=> false,
 				'default' => strtoupper(Tools::passwdGen(16))
+			),
+			7 => array(
+				'config_name' => $this->_abbreviation . '_CACHE_ID',
+				'name' => strtolower($this->name) . '_cache_id',
+				'type'	=> false,
+				'default' => strtoupper(Tools::passwdGen(10))
 			)
 		);
 
@@ -473,7 +496,7 @@ class FlashSales extends Module
 			// Special
 			$time = strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD') + Configuration::get($this->_abbreviation . '_TIME_START_DAY');
 			Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', $time);
-
+			$this->_emptyCache(false);
 			$output .= '<div class="conf confirm"><img src="../img/admin/ok.gif" alt="'.$this->l('Confirmation').'" />'.$this->l('Settings updated').'</div>';
 		}
 
@@ -498,32 +521,50 @@ class FlashSales extends Module
 					$sql = 'SELECT fo.`id_flashsales_offer`, COUNT(fom.`id_flashsales_offer`) AS `nb_demand`
 					FROM `'._DB_PREFIX_.'flashsales_offer` fo
 					LEFT JOIN `'._DB_PREFIX_.'flashsales_offer_mailalert` fom ON (fom.`id_flashsales_offer` = fo.`id_flashsales_offer`)
-					WHERE fo.`date_start` != '. $nextPeriod .'
+					WHERE fo.`date_start` < CURRENT_DATE()
 					ORDER by `nb_demand`
 					LIMIT ' . (int)$nbOffersMissing;
-
 					$results = Db::getInstance()->ExecuteS($sql);
-					foreach($results AS $result)
+					if(empty($results))
 					{
-						$flashsales_offer = new FlashsalesOffer($result['id_flashsales_offer']);
-						$flashsales_offer->date_start = $nextPeriod;
-						$flashsales_offer->date_end		= $nextPeriod + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD');
-						$flashsales_offer->update();
+						$sql = 'SELECT fo.`id_flashsales_offer`, COUNT(fom.`id_flashsales_offer`) AS `nb_demand`
+						FROM `'._DB_PREFIX_.'flashsales_offer` fo
+						LEFT JOIN `'._DB_PREFIX_.'flashsales_offer_mailalert` fom ON (fom.`id_flashsales_offer` = fo.`id_flashsales_offer`)
+						WHERE fo.`date_start` NOT IN(CURRENT_DATE(), \''. $nextPeriod .'\')
+						ORDER by `nb_demand`
+						LIMIT ' . (int)$nbOffersMissing;
+						$results = Db::getInstance()->ExecuteS($sql);
+					}
+					if(!empty($results))
+					{
+						foreach($results AS $result)
+						{
+							$flashsales_offer = new FlashsalesOffer($result['id_flashsales_offer']);
+							$flashsales_offer->date_start = $nextPeriod;
+							$flashsales_offer->date_end		= date('Y-m-d', (int)(Configuration::get($this->_abbreviation . '_NEXT_PERIOD') + (int)(Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD'))));
+							$flashsales_offer->update();
+						}
 					}
 				}
 				break;
 			case 2:
-				// Disable products & disable offers.
-				if(time() >= Configuration::get($this->_abbreviation . '_NEXT_PERIOD'))
+				// CLEAR CACHE
+				$this->_emptyCache(false);
+				break;
+			case 3:
+				// CLEAR ALL CACHE
+				$this->_emptyCache(true);
+				break;
+				// Disable offers.
+				/*
+				if(time() <= Configuration::get($this->_abbreviation . '_NEXT_PERIOD'))
 				{
 					$nextPeriod = date('Y-m-d', Configuration::get($this->_abbreviation . '_NEXT_PERIOD'));
-					$sql = 'UPDATE SET fo.`active` = 0
-									FROM `'._DB_PREFIX_.'flashsales_offer` fo
-									WHERE fo.`date_end` = ' . $nextPeriod;
+					$sql = 'UPDATE `'._DB_PREFIX_.'flashsales_offer` fo SET fo.`active` = 0 WHERE fo.`date_end` != \'' . $nextPeriod . '\'';
 					Db::getInstance()->Execute($sql);
 					// Clear cache ?
 				}
-				break;
+				*/
 		}
 	}
 
@@ -556,13 +597,28 @@ class FlashSales extends Module
 	{
 		global $smarty, $cookie;
 
-		$vars = array(
-			'module_name' => strtoupper($this->name),
-			'products' => FlashsalesOffer::getOffersForTheDay(date('Y-m-d'), (int)$cookie->id_lang)
-		);
-		$smarty->assign(strtolower($this->name), $vars);
+		// Cache
+		$smartyCacheId = self::$cacheFiles[0] . '|' . Configuration::get('FS_CACHE_ID');
+		$templateName = self::$cacheFiles[0] .'.tpl';
 
-		return $this->display(__FILE__, strtolower($this->name).'.tpl');
+		Tools::enableCache();
+		$end = strtotime('midnight') + (int)Configuration::get('FS_TIME_START_DAY') + (int)Configuration::get('FS_TIME_BETWEEN_PERIOD');
+		$now = strtotime('now');
+		$smarty->cache_lifetime = $end - $now;
+
+		if (!$this->isCached($templateName, $smartyCacheId))
+		{
+			$vars = array(
+				'module_name' => strtoupper($this->name),
+				'products' => FlashsalesOffer::getOffersForTheDay(date('Y-m-d'), (int)$cookie->id_lang)
+			);
+			$smarty->assign(strtolower($this->name), $vars);
+		}
+
+		$display = $this->display(__FILE__, $templateName, $smartyCacheId);
+		Tools::restoreCacheSettings();
+
+		return $display;
 	}
 
 	// ---------------------------
@@ -1006,6 +1062,45 @@ class FlashSales extends Module
 	public static function secondsToMinutesSmarty($params, &$smarty)
 	{
 		return self::_secondsToMinutes($params['time']);
+	}
+
+	private function _emptyCache($all = false)
+	{
+		global $smarty;
+
+		if($all)
+		{
+			foreach(self::$cacheDirs as $dir)
+				if (file_exists($dir))
+					self::emptyDir($dir);
+		}
+		else
+		{
+			foreach(self::$cacheFiles AS $file)
+			{
+				$cache_id = self::$cacheFiles[0] . '|' . Configuration::get('FS_CACHE_ID');
+				$template_name = self::$cacheFiles[0] . '.tpl';
+				$template_name = $this->_getApplicableTemplateDir($template_name) . $template_name;
+				$smarty->clearCache($template_name, $cache_id);
+			}
+
+			Configuration::updateValue('FS_CACHE_ID', strtoupper(Tools::passwdGen(10)));
+		}
+	}
+
+	public static function emptyDir($dir)
+	{
+		if (is_dir($dir))
+		{
+			$objects = scandir($dir);
+			foreach ($objects as $object)
+				if ($object != "." && $object != ".." && $object != 'index.php')
+					if (filetype($dir."/".$object) == "dir")
+						self::emptyDir($dir."/".$object);
+					else
+						@unlink($dir."/".$object);
+			reset($objects);
+		}
 	}
 }
 ?>
