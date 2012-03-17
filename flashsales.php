@@ -46,6 +46,13 @@ class FlashSales extends Module
 		self::$cacheFiles = array(
 			self::$moduleName . '_home'
 		);
+		
+		$this->_controllers = array(
+			1 => array(
+				'root_file' => 'flashsalesoffer.php',
+				'controller' => 'FlashSalesOfferController.php'
+			)
+		);
 
 		$this->_tables = array(
 			'flashsales_offer' => array(
@@ -671,6 +678,14 @@ class FlashSales extends Module
 		}
 
 		@unlink(_PS_IMG_DIR_ . 't/' . $this->_adminClassName . '.gif');
+
+		foreach($this->_controllers AS $controller)
+		{
+			@unlink(_PS_ROOT_DIR_ . $controller['root_file']);
+			@unlink(_PS_CONTROLLER_DIR_ . $controller['controller']);
+		}
+
+		$this->_emptyCache(true);
 
 		return true;
 	}
