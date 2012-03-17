@@ -50,7 +50,13 @@ class FlashSales extends Module
 		$this->_controllers = array(
 			1 => array(
 				'root_file' => 'flashsalesoffer.php',
-				'controller' => 'FlashSalesOfferController.php'
+				'controller' => 'FlashSalesOfferController.php',
+				'tpl_file' => 'flashsalesoffer.tpl'
+			),
+			2 => array(
+				'root_file' => 'flashsalesofferold.php',
+				'controller' => 'FlashSalesOfferOldController.php',
+				'tpl_file' => 'flashsalesofferold.tpl'
 			)
 		);
 
@@ -683,6 +689,7 @@ class FlashSales extends Module
 		{
 			@unlink(_PS_ROOT_DIR_ . $controller['root_file']);
 			@unlink(_PS_CONTROLLER_DIR_ . $controller['controller']);
+			@unlink(_THEME_DIR_ . $controller['tpl_file']);
 		}
 
 		$this->_emptyCache(true);
