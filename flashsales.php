@@ -303,28 +303,34 @@ class FlashSales extends Module
 				'name' => 'flashsales_offer_mailalert',
 				'fields' => array(
 					0 => array(
-						'name' 			=> 'id_flashsales_offer',
+						'name' 			=> 'id_flashsales_offer_mailalert',
 						'type' 			=> 'INT',
 						'size' 			=>	10,
 						'unsigned' 	=> true,
 						'null' 			=> false
 					),
 					1 => array(
-						'name' 			=> 'id_customer',
+						'name' 			=> 'id_flashsales_offer',
 						'type' 			=> 'INT',
 						'size' 			=>	10,
 						'unsigned' 	=> true,
 						'null' 			=> false
 					),
 					2 => array(
+						'name' 			=> 'id_customer',
+						'type' 			=> 'INT',
+						'size' 			=>	10,
+						'unsigned' 	=> true,
+						'null' 			=> true
+					),
+					3 => array(
 						'name' 			=> 'customer_email',
 						'type' 			=> 'VARCHAR',
 						'size' 			=>	128,
 						'unsigned' 	=> false,
 						'null' 			=> false
 					)
-				),
-				'identifiers' => array('id_flashsales_offer', 'id_customer')
+				)
 			)
 		);
 
