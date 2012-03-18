@@ -246,7 +246,7 @@ class FlashSalesOffer extends ObjectModel
 				}
 			}
 		}
-		elseif(isset($checked))
+		elseif(isset($checked) && is_array($checked))
 		{
 			foreach($checked AS $check)
 			{
@@ -435,6 +435,19 @@ class FlashSalesOffer extends ObjectModel
 		$results = Db::getInstance()->ExecuteS('SELECT `id_flashsales_offer`
 			FROM `'._DB_PREFIX_.'flashsales_offer`
 			WHERE `date_start` = \'' . $date_start . '\'
+			AND `active` = 1');
+		$offers = array();
+		foreach($results AS $result)
+			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang);
+
+		return $offers;
+	}
+
+	public static function getOffersBeforeTheDay($date_start, $id_lang)
+	{
+		$results = Db::getInstance()->ExecuteS('SELECT `id_flashsales_offer`
+			FROM `'._DB_PREFIX_.'flashsales_offer`
+			WHERE `date_end` <= \'' . $date_start . '\'
 			AND `active` = 1');
 		$offers = array();
 		foreach($results AS $result)

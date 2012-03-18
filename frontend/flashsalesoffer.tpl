@@ -1,2 +1,2 @@
 blop
-{$test}
+{$offers|print_r}

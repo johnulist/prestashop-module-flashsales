@@ -20,11 +20,17 @@ class FlashSalesOfferControllerCore extends FrontController
 
 		parent::preProcess();
 	}
+	
+	public function process()
+	{
+		parent::process();
+		
+		self::$smarty->assign('offers', FlashSalesOffer::getOffersForTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang)));
+	}
 
 	public function displayContent()
 	{
 		parent::displayContent();
-		self::$smarty->assign('test', 'non');
 		self::$smarty->display(_PS_THEME_DIR_. $this->tpl_file);
 	}
 }
