@@ -644,7 +644,7 @@ class FlashSales extends Module
 	{
 		global $smarty, $cookie;
 		$templateName = self::$cacheFiles[1] .'.tpl';
-		$target = date('Y-m-d H:i:s', strtotime('midnight') + (int)Configuration::get('FS_TIME_START_DAY') + (int)Configuration::get('FS_TIME_BETWEEN_PERIOD'));
+		$target = date('Y-m-d H:i:s', (int)Configuration::get('FS_NEXT_PERIOD'));
 
 		$smarty->assign('target', $target);
 		return $this->display(__FILE__, $templateName);
