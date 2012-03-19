@@ -324,7 +324,7 @@ class FlashSales extends Module
 						'null' 			=> false
 					)
 				),
-				identifiers => false
+				'identifiers' => false
 			)
 		);
 
