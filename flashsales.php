@@ -44,7 +44,8 @@ class FlashSales extends Module
 		);
 		
 		self::$cacheFiles = array(
-			self::$moduleName . '_home'
+			self::$moduleName . '_home',
+			self::$moduleName . '_header'
 		);
 		
 		$this->_controllers = array(
@@ -419,8 +420,14 @@ class FlashSales extends Module
 				'insert' => false
 			),
 			2 => array(
-				'name'	=> 'homeFlashSales',
+				'name'	=> $this->name . 'Home',
 				'title' => 'Home flash sales',
+				'description' => '',
+				'insert' => true
+			),
+			3 => array(
+				'name'	=> $this->name . 'Counter',
+				'title' => 'Counter flash sales',
 				'description' => '',
 				'insert' => true
 			)
@@ -600,13 +607,12 @@ class FlashSales extends Module
 		foreach($this->_hooks as $hook)
 		{
 			if($hook['insert'])
-				$smarty->assign('HOOK_' . strtoupper($this->name) . '_' . strtoupper($hook['name']), Module::hookExec($hook['name']));
+				$smarty->assign('HOOK_' . strtoupper($hook['name']), Module::hookExec($hook['name']));
 		}
-
 		$smarty->assign('module_header_' . strtolower($this->name), $vars);
 	}
 
-	public function hookHomeFlashSales($params)
+	public function hookFlashsalesHome($params)
 	{
 		global $smarty, $cookie;
 
@@ -632,6 +638,16 @@ class FlashSales extends Module
 		Tools::restoreCacheSettings();
 
 		return $display;
+	}
+
+	public function hookFlashsalesCounter($params)
+	{
+		global $smarty, $cookie;
+		$templateName = self::$cacheFiles[1] .'.tpl';
+		$target = date('Y-m-d H:i:s', strtotime('midnight') + (int)Configuration::get('FS_TIME_START_DAY') + (int)Configuration::get('FS_TIME_BETWEEN_PERIOD'));
+
+		$smarty->assign('target', $target);
+		return $this->display(__FILE__, $templateName);
 	}
 
 	// ---------------------------
