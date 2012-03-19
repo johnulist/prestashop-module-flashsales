@@ -302,13 +302,6 @@ class FlashSales extends Module
 			'flashsales_offer_mailalert' => array(
 				'name' => 'flashsales_offer_mailalert',
 				'fields' => array(
-					0 => array(
-						'name' 			=> 'id_flashsales_offer_mailalert',
-						'type' 			=> 'INT',
-						'size' 			=>	10,
-						'unsigned' 	=> true,
-						'null' 			=> false
-					),
 					1 => array(
 						'name' 			=> 'id_flashsales_offer',
 						'type' 			=> 'INT',
@@ -330,7 +323,8 @@ class FlashSales extends Module
 						'unsigned' 	=> false,
 						'null' 			=> false
 					)
-				)
+				),
+				identifiers => false
 			)
 		);
 
