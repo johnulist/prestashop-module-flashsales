@@ -432,6 +432,29 @@ class FlashSales extends Module
 				'insert' => true
 			)
 		);
+		
+		$this->_imageType = array(
+			0 => array(
+				'name' => 'pictoffer',
+				'width' => 394,
+				'height' => 264
+			),
+			1 => array(
+				'name' => 'pictofferfancy',
+				'width' => 394,
+				'height' => 264
+			),
+			2 => array(
+				'name' => 'pictofferthumbs',
+				'width' => 57,
+				'height' => 57
+			),
+			3 => array(
+				'name' => 'pictotheroffer',
+				'width' => 196,
+				'height' => 183
+			)
+		);
 	}
 
 	public function getContent()
@@ -529,7 +552,7 @@ class FlashSales extends Module
 		{
 			case 1:
 				// Update next period
-				Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', strtotime('midnight') + self::_daysToSeconds(1) + 36000);
+				Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
 				// Check if all offers for the day
 				$nextPeriod = date('Y-m-d', Configuration::get($this->_abbreviation . '_NEXT_PERIOD'));
 				$nbOffersOfTheDay = FlashsalesOffer::getNumberOffersForTheDay($nextPeriod);
@@ -614,7 +637,7 @@ class FlashSales extends Module
 
 	public function hookFlashsalesHome($params)
 	{
-		global $smarty, $cookie;
+		global $smarty, $cookie, $link;
 
 		// Cache
 		$smartyCacheId = self::$cacheFiles[0] . '|' . Configuration::get('FS_CACHE_ID');
@@ -629,8 +652,12 @@ class FlashSales extends Module
 		{
 			$vars = array(
 				'module_name' => strtoupper($this->name),
-				'products' => FlashsalesOffer::getOffersForTheDay(date('Y-m-d'), (int)$cookie->id_lang)
+				'offers' => FlashsalesOffer::getOffersForTheDay(date('Y-m-d'), (int)$cookie->id_lang)
 			);
+
+			foreach($this->_imageType AS $image)
+				$smarty->assign($image['name'] . 'Size', Image::getSize($image['name']));
+
 			$smarty->assign(strtolower($this->name), $vars);
 		}
 
@@ -679,6 +706,18 @@ class FlashSales extends Module
 		}
 
 		@copy(_PS_MODULE_DIR_ . $this->name . '/logo.gif', _PS_IMG_DIR_ . 't/' . $this->_adminClassName . '.gif');
+		
+		foreach($this->_imageType AS $image)
+		{
+			$imageType = new ImageType();
+			$imageType->name = $image['name'];
+			$imageType->width = $image['width'];
+			$imageType->height = $image['height'];
+			$imageType->products = true;
+
+			if(!$imageType->add())
+				return false;
+		}
 
 		return true;
 	}
@@ -706,6 +745,15 @@ class FlashSales extends Module
 			@unlink(_PS_ROOT_DIR_ . $controller['root_file']);
 			@unlink(_PS_CONTROLLER_DIR_ . $controller['controller']);
 			@unlink(_THEME_DIR_ . $controller['tpl_file']);
+		}
+
+		foreach($this->_imageType AS $image)
+		{
+			$image_type = ImageType::getByNameNType($image['name'], 'products');
+			$imageType = new ImageType($image_type['id_image_type']);
+
+			if(!$imageType->delete())
+				return false;
 		}
 
 		$this->_emptyCache(true);

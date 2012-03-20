@@ -7,7 +7,7 @@
 	<p>s</p>
 	<div id="countdown-blog"></div>
 	<script>
-		var target = "{$target}";
+		var targetCountDown = "{$target}";
 		var redTime = 6;
 	</script>
 	<script src="{$js_dir}countdown.js"></script>

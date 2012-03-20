@@ -24,6 +24,7 @@ class FlashSalesOffer extends ObjectModel
 
 	public $images;
 	public $products;
+	public $min_price;
 
 	protected $table = 'flashsales_offer';
 	protected $identifier = 'id_flashsales_offer';
@@ -60,8 +61,10 @@ class FlashSalesOffer extends ObjectModel
 			$id_lang = Configuration::get('PS_LANG_DEFAULT');
 		if($this->id)
 		{
-			$this->products = $this->getProducts($id_lang);
-			$this->images		= $this->getImages($id_lang);
+			$this->products  = $this->getProducts($id_lang);
+			$this->images		 = $this->getImages($id_lang);
+			$this->prices = $this->getPricesOffer();
+			$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
 		}
 	}
 	public function getFields()
@@ -152,6 +155,39 @@ class FlashSalesOffer extends ObjectModel
 			$products[] = new Product($result['id_product'], false, $id_lang);
 
 		return $products;
+	}
+
+	public function getPricesOffer()
+	{
+		global $cookie;
+		$sql = 'SELECT MIN(p.`price`) AS `min_price`, products.`id_product`, p.`quantity`
+		FROM (SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` fp WHERE `id_flashsales_offer` = ' . $this->id . ') AS `products`
+		LEFT JOIN `'._DB_PREFIX_.'product` p ON (p.`id_product` = products.`id_product`)';
+
+		$result = Db::getInstance()->ExecuteS($sql);
+		$id_shop = (int)(Shop::getCurrentShop());
+		$id_currency = (isset($cookie->id_currency) AND (int)($cookie->id_currency) ? $cookie->id_currency : Configuration::get('PS_CURRENCY_DEFAULT'));
+		$id_country = (int)Country::getDefaultCountryId();
+		$id_customer = ((Validate::isCookie($cookie) AND isset($cookie->id_customer) AND $cookie->id_customer) ? (int)($cookie->id_customer) : NULL);
+		$id_group = $id_customer ? (int)(Customer::getDefaultGroupId($id_customer)) : _PS_DEFAULT_CUSTOMER_GROUP_;
+		$prices = array(
+			'min_price' => Product::getPriceStatic($result[0]['id_product'], true, NULL, 2),
+			'min_price_reduce' => Product::getPriceStatic($result[0]['id_product'], true, NULL, 6, NULL, false, false),
+			'reduction' => SpecificPrice::getSpecificPrice($result[0]['id_product'], $id_shop, $id_currency, $id_country, $id_group, $result[0]['id_product'])
+		);
+		return $prices;
+	}
+	
+	public function getNumberProductsAlreadyBuyInOffer()
+	{
+		$sql = 'SELECT COUNT(od.`product_id`) AS `nb`
+		FROM `'._DB_PREFIX_.'flashsales_product` fp
+		LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON (od.`product_id` = fp.`id_product`)
+		LEFT JOIN `'._DB_PREFIX_.'orders` o ON (o.`id_order` = od.`id_order`)
+		WHERE fp.`id_flashsales_offer` = '.(int)($this->id) . '
+		AND DATE(o.`date_add`) = CURRENT_DATE()';
+		$result = Db::getInstance()->getRow($sql);
+		return $result['nb'];
 	}
 
 	public function getImages($id_lang)
@@ -435,7 +471,8 @@ class FlashSalesOffer extends ObjectModel
 		$results = Db::getInstance()->ExecuteS('SELECT `id_flashsales_offer`
 			FROM `'._DB_PREFIX_.'flashsales_offer`
 			WHERE `date_start` = \'' . $date_start . '\'
-			AND `active` = 1');
+			AND `active` = 1
+			ORDER BY `default` DESC');
 		$offers = array();
 		foreach($results AS $result)
 			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang);
