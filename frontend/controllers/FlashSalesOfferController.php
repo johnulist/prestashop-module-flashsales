@@ -1,4 +1,5 @@
 <?php
+include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesOffer.php';
 class FlashSalesOfferControllerCore extends FrontController
 {
 	public $php_self = 'flashsalesoffer.php';
@@ -7,8 +8,8 @@ class FlashSalesOfferControllerCore extends FrontController
 	
 	public function preProcess()
 	{
-		if ($id_flashsalesoffer = (int)Tools::getValue('id_flashsalesoffer'))
-			$this->flashsalesoffer = new FlashSalesOffer($id_flashsalesoffer, self::$cookie->id_lang);
+		if ($id_flashsales_offer = (int)Tools::getValue('id_flashsales_offer'))
+			$this->flashsalesoffer = new FlashSalesOffer($id_flashsales_offer, self::$cookie->id_lang);
 
 		if (!Validate::isLoadedObject($this->flashsalesoffer))
 		{
@@ -24,8 +25,8 @@ class FlashSalesOfferControllerCore extends FrontController
 	public function process()
 	{
 		parent::process();
-		
-		self::$smarty->assign('offers', FlashSalesOffer::getOffersForTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang)));
+
+		self::$smarty->assign('flashsalesoffer', $this->flashsalesoffer);
 	}
 
 	public function displayContent()
