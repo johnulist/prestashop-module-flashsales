@@ -83,7 +83,7 @@
 			<i class="sprite next"></i>		
 		</a>
 	</div><!-- End#product-highlight -->
-	
+{if $module.offers|@count gt 0}
 	<div id="other-product" class="clearfix">
 		<p class="other-product-title">Les autres offres</p>
 		<ul>
@@ -114,4 +114,5 @@
 		{/foreach}
 		</ul>
 	</div><!-- End#other-product -->
+{/if}
 <!-- / MODULE {$module.module_name} -->

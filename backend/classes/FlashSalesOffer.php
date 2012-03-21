@@ -14,6 +14,7 @@ class FlashSalesOffer extends ObjectModel
 	public $name;
 	public $description;
 	public $description_short;
+	public $composition;
 	public $link_rewrite;
 	public $meta_title;
 	public $meta_keywords;
@@ -47,6 +48,7 @@ class FlashSalesOffer extends ObjectModel
 		'name' => 'isCatalogName',
 		'description' => 'isString',
 		'description_short' => 'isString',
+		'composition' => 'isString',
 		'link_rewrite' => 'isLinkRewrite',
 		'meta_title' => 'isGenericName',
 		'meta_keywords' => 'isGenericName',
@@ -54,7 +56,7 @@ class FlashSalesOffer extends ObjectModel
 	);
 
 
-	public function __construct($id_flashsales_offer = NULL, $id_lang = NULL)
+	public function __construct($id_flashsales_offer = NULL, $id_lang = NULL, $light = false)
 	{
 		parent::__construct($id_flashsales_offer, $id_lang);
 		if(!$id_lang)
@@ -63,8 +65,11 @@ class FlashSalesOffer extends ObjectModel
 		{
 			$this->products  = $this->getProducts($id_lang);
 			$this->images		 = $this->getImages($id_lang);
-			$this->prices = $this->getPricesOffer();
-			$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
+			if(!$light)
+			{
+				$this->prices = $this->getPricesOffer();
+				$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
+			}
 		}
 	}
 	public function getFields()
@@ -102,6 +107,7 @@ class FlashSalesOffer extends ObjectModel
 			$fields[$language['id_lang']]['name'] = (isset($this->name[$language['id_lang']])) ? pSQL($this->name[$language['id_lang']], true) : '';
 			$fields[$language['id_lang']]['description'] = (isset($this->description[$language['id_lang']])) ? pSQL($this->description[$language['id_lang']], true) : '';
 			$fields[$language['id_lang']]['description_short'] = (isset($this->description_short[$language['id_lang']])) ? pSQL($this->description_short[$language['id_lang']], true) : '';
+			$fields[$language['id_lang']]['composition'] = (isset($this->composition[$language['id_lang']])) ? pSQL($this->composition[$language['id_lang']], true) : '';
 			$fields[$language['id_lang']]['link_rewrite'] = (isset($this->link_rewrite[$language['id_lang']])) ? pSQL($this->link_rewrite[$language['id_lang']], true) : '';
 			$fields[$language['id_lang']]['meta_title'] = (isset($this->meta_title[$language['id_lang']])) ? pSQL($this->meta_title[$language['id_lang']], true) : '';
 			$fields[$language['id_lang']]['meta_keywords'] = (isset($this->meta_keywords[$language['id_lang']])) ? pSQL($this->meta_keywords[$language['id_lang']], true) : '';
@@ -151,9 +157,10 @@ class FlashSalesOffer extends ObjectModel
 	{
 		$results = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` WHERE `id_flashsales_offer` = ' . $this->id);
 		$products = array();
+
 		foreach($results AS $result)
 		{
-			$product = new Product($result['id_product'], false, $id_lang);
+			$product = new Product($result['id_product'], true, $id_lang);
 			$images = $product->getImages((int)$id_lang);
 			$productImages = array();
 			foreach ($images AS $k => $image)
@@ -232,7 +239,6 @@ class FlashSalesOffer extends ObjectModel
 					$combinations[$id_product_attribute]['list'] = $attributeList;
 				}
 			}
-
 			$products[] = array(
 				'product' => $product,
 				'images' => $productImages,
@@ -254,17 +260,23 @@ class FlashSalesOffer extends ObjectModel
 		LEFT JOIN `'._DB_PREFIX_.'product` p ON (p.`id_product` = products.`id_product`)';
 
 		$result = Db::getInstance()->ExecuteS($sql);
+
 		$id_shop = (int)(Shop::getCurrentShop());
 		$id_currency = (isset($cookie->id_currency) AND (int)($cookie->id_currency) ? $cookie->id_currency : Configuration::get('PS_CURRENCY_DEFAULT'));
 		$id_country = (int)Country::getDefaultCountryId();
 		$id_customer = ((Validate::isCookie($cookie) AND isset($cookie->id_customer) AND $cookie->id_customer) ? (int)($cookie->id_customer) : NULL);
 		$id_group = $id_customer ? (int)(Customer::getDefaultGroupId($id_customer)) : _PS_DEFAULT_CUSTOMER_GROUP_;
-		$prices = array(
-			'min_price' => Product::getPriceStatic($result[0]['id_product'], true, NULL, 2),
-			'min_price_reduce' => Product::getPriceStatic($result[0]['id_product'], true, NULL, 6, NULL, false, false),
-			'reduction' => SpecificPrice::getSpecificPrice($result[0]['id_product'], $id_shop, $id_currency, $id_country, $id_group, $result[0]['id_product'])
-		);
+		if($result)
+		{
+			$prices = array(
+				'min_price' => Product::getPriceStatic($result[0]['id_product'], true, NULL, 2),
+				'min_price_reduce' => Product::getPriceStatic($result[0]['id_product'], true, NULL, 6, NULL, false, false),
+				'reduction' => SpecificPrice::getSpecificPrice($result[0]['id_product'], $id_shop, $id_currency, $id_country, $id_group, $result[0]['id_product'])
+			);
 		return $prices;
+		}
+		else
+			return null;
 	}
 	
 	public function getNumberProductsAlreadyBuyInOffer()
@@ -561,6 +573,21 @@ class FlashSalesOffer extends ObjectModel
 			FROM `'._DB_PREFIX_.'flashsales_offer`
 			WHERE `date_start` = \'' . $date_start . '\'
 			AND `active` = 1
+			ORDER BY `default` DESC');
+		$offers = array();
+		foreach($results AS $result)
+			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang);
+
+		return $offers;
+	}
+
+	public static function getOthersOffersForTheDay($date_start, $id_lang, $id_flashsales_offer)
+	{
+		$results = Db::getInstance()->ExecuteS('SELECT `id_flashsales_offer`
+			FROM `'._DB_PREFIX_.'flashsales_offer`
+			WHERE `date_start` = \'' . $date_start . '\'
+			AND `active` = 1
+			AND `id_flashsales_offer` != ' . $id_flashsales_offer . '
 			ORDER BY `default` DESC');
 		$offers = array();
 		foreach($results AS $result)

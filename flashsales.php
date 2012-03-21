@@ -145,27 +145,34 @@ class FlashSales extends Module
 						'null' 			=> false
 					),
 					3 => array(
+						'name' 			=> 'composition',
+						'type' 			=> 'TEXT',
+						'size' 			=> false,
+						'unsigned' 	=> false,
+						'null' 			=> false
+					),
+					4 => array(
 						'name' 			=> 'link_rewrite',
 						'type' 			=> 'VARCHAR',
 						'size' 			=> 128,
 						'unsigned' 	=> false,
 						'null' 			=> false
 					),
-					4 => array(
+					5 => array(
 						'name' 			=> 'meta_title',
 						'type' 			=> 'VARCHAR',
 						'size' 			=> 128,
 						'unsigned' 	=> false,
 						'null' 			=> true
 					),
-					5 => array(
+					6 => array(
 						'name' 			=> 'meta_keywords',
 						'type' 			=> 'VARCHAR',
 						'size' 			=> 255,
 						'unsigned' 	=> false,
 						'null' 			=> true
 					),
-					6 => array(
+					7 => array(
 						'name' 			=> 'meta_description',
 						'type' 			=> 'VARCHAR',
 						'size' 			=> 255,
@@ -432,7 +439,7 @@ class FlashSales extends Module
 				'insert' => true
 			)
 		);
-		
+
 		$this->_imageType = array(
 			0 => array(
 				'name' => 'pictoffer',
@@ -552,6 +559,7 @@ class FlashSales extends Module
 		{
 			case 1:
 				// Update next period
+				// SET CRON TASK TO CHANGE NEXT PERIOD (h-1 CURRENT PERIOD)
 				Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
 				// Check if all offers for the day
 				$nextPeriod = date('Y-m-d', Configuration::get($this->_abbreviation . '_NEXT_PERIOD'));
@@ -582,7 +590,7 @@ class FlashSales extends Module
 					{
 						foreach($results AS $result)
 						{
-							$flashsales_offer = new FlashsalesOffer($result['id_flashsales_offer']);
+							$flashsales_offer = new FlashsalesOffer($result['id_flashsales_offer'], NULL, true);
 							$flashsales_offer->date_start = $nextPeriod;
 							$flashsales_offer->date_end		= date('Y-m-d', (int)(Configuration::get($this->_abbreviation . '_NEXT_PERIOD') + (int)(Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD'))));
 							$flashsales_offer->update();
@@ -592,22 +600,14 @@ class FlashSales extends Module
 				break;
 			case 2:
 				// CLEAR CACHE
+				// SET CRON TASK TO CHANGE PERIOD (10h by default)
+				Configuration::updateValue($this->_abbreviation . '_CURRENT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
 				$this->_emptyCache(false);
 				break;
 			case 3:
 				// CLEAR ALL CACHE
 				$this->_emptyCache(true);
 				break;
-				// Disable offers.
-				/*
-				if(time() <= Configuration::get($this->_abbreviation . '_NEXT_PERIOD'))
-				{
-					$nextPeriod = date('Y-m-d', Configuration::get($this->_abbreviation . '_NEXT_PERIOD'));
-					$sql = 'UPDATE `'._DB_PREFIX_.'flashsales_offer` fo SET fo.`active` = 0 WHERE fo.`date_end` != \'' . $nextPeriod . '\'';
-					Db::getInstance()->Execute($sql);
-					// Clear cache ?
-				}
-				*/
 		}
 	}
 
@@ -644,15 +644,15 @@ class FlashSales extends Module
 		$templateName = self::$cacheFiles[0] .'.tpl';
 
 		Tools::enableCache();
-		$end = strtotime('midnight') + (int)Configuration::get('FS_TIME_START_DAY') + (int)Configuration::get('FS_TIME_BETWEEN_PERIOD');
-		$now = strtotime('now');
+		$end = Configuration::get($this->_abbreviation . '_NEXT_PERIOD');
+		$now = time();
 		$smarty->cache_lifetime = $end - $now;
 
 		if (!$this->isCached($templateName, $smartyCacheId))
 		{
 			$vars = array(
 				'module_name' => strtoupper($this->name),
-				'offers' => FlashsalesOffer::getOffersForTheDay(date('Y-m-d'), (int)$cookie->id_lang)
+				'offers' => FlashsalesOffer::getOffersForTheDay(date('Y-m-d', (int)Configuration::get('FS_CURRENT_PERIOD')), (int)$cookie->id_lang)
 			);
 
 			foreach($this->_imageType AS $image)
