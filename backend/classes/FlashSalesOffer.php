@@ -258,7 +258,6 @@ class FlashSalesOffer extends ObjectModel
 		$sql = 'SELECT MIN(p.`price`) AS `min_price`, products.`id_product`, p.`quantity`
 		FROM (SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` fp WHERE `id_flashsales_offer` = ' . $this->id . ') AS `products`
 		LEFT JOIN `'._DB_PREFIX_.'product` p ON (p.`id_product` = products.`id_product`)';
-
 		$result = Db::getInstance()->ExecuteS($sql);
 
 		$id_shop = (int)(Shop::getCurrentShop());
@@ -266,12 +265,13 @@ class FlashSalesOffer extends ObjectModel
 		$id_country = (int)Country::getDefaultCountryId();
 		$id_customer = ((Validate::isCookie($cookie) AND isset($cookie->id_customer) AND $cookie->id_customer) ? (int)($cookie->id_customer) : NULL);
 		$id_group = $id_customer ? (int)(Customer::getDefaultGroupId($id_customer)) : _PS_DEFAULT_CUSTOMER_GROUP_;
+
 		if($result)
 		{
 			$prices = array(
-				'min_price' => Product::getPriceStatic($result[0]['id_product'], true, NULL, 2),
+				'min_price' => Product::getPriceStatic($result[0]['id_product'], true, false),
 				'min_price_reduce' => Product::getPriceStatic($result[0]['id_product'], true, NULL, 6, NULL, false, false),
-				'reduction' => SpecificPrice::getSpecificPrice($result[0]['id_product'], $id_shop, $id_currency, $id_country, $id_group, $result[0]['id_product'])
+				'reduction' => SpecificPrice::getSpecificPrice($result[0]['id_product'], $id_shop, $id_currency, $id_country, $id_group, $result[0]['quantity'])
 			);
 		return $prices;
 		}
