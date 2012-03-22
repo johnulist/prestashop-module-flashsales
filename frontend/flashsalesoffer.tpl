@@ -38,7 +38,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 		{assign var='groups' value=$fproduct['groups']}
 		{assign var='combinations' value=$fproduct['combinations']}
 		{assign var='colors' value=$fproduct['colors']}
-		
+		<div class="sub-product clearfix">
 		<script type="text/javascript">
 		// <![CDATA[
 
@@ -72,7 +72,6 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 
 		//]]>
 		</script>
-		<div class="sub-product clearfix">
 			<div class="left-side">
 				<h3>{$product->name|escape:'htmlall':'UTF-8'}</h3>
 				<p>{$product->description|strip_tags}</p>
@@ -124,7 +123,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 				<label for="qty">{l s='Quantité :'}</label>
 				<input type="text" name="qty" id="quantity_wanted" value="1">
 				<a href="" title="" class="sprite acheter"></a>
-				<a href="" title="" class="offer-to-friends"><i class="sprite cadeau"></i>Offrez-le à un ami</a>
+				<a href="" title="" class="offer-to-friends"><i class="sprite cadeau"></i>{l s='Offrez-le à un ami'}</a>
 				<ul class="share">
 					<li><a href="" title=""><i class="sprite fb"></i></a></li>
 					<li><a href="" title=""><i class="sprite tw"></i></a></li>
