@@ -23,18 +23,20 @@
 							</div>
 						</div>
 						<div id="tabContainer">
+								{if $offer->composition}
 								<div id="more_info_tabs">
 									<ul>
 										<li id="tabHeader_1">{l s='Description'}</li>
 										<li id="tabHeader_2">{l s='Composition'}</li>
 									</ul>
 								</div><!-- END#tabs -->
+								{/if}
 								<div id="more_info_sheets">
 									<div class="tabpage" id="tabpage_1">
 										<p>{$offer->description}</p>
 									</div>
 									<div class="tabpage" id="tabpage_2">
-								<p>lorem ipsum 2</p>
+								<p>{$offer->composition}</p>
 									</div>
 								</div>
 						</div><!-- END#tabContainer -->

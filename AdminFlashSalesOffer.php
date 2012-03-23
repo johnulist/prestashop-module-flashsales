@@ -140,7 +140,16 @@ class AdminFlashSalesOffer extends AdminTab
 						</div>';
 		echo '	<p class="clear"></p>
 					</div>';
-		
+		// COMPOSITION
+		echo '<label>'.$this->l('Composition:').' </label>
+					<div class="margin-form translatable">';
+		foreach ($this->_languages as $language)
+		echo '
+						<div class="lang_'.$language['id_lang'].'" style="display: '.($language['id_lang'] == $this->_defaultFormLanguage ? 'block' : 'none').'; float: left;">
+							<textarea name="composition_'.$language['id_lang'].'" rows="10" cols="50">'.htmlentities($this->getFieldValue($obj, 'composition', (int)($language['id_lang'])), ENT_COMPAT, 'UTF-8').'</textarea>
+						</div>';
+		echo '	<p class="clear"></p>
+					</div>';
 		echo '<fieldset style="font-size: 1em">
 						<legend><img src="../img/admin/cart.gif">'. $this->l('Products') .'</legend>';
 		echo '	<table>
