@@ -63,10 +63,11 @@ class FlashSalesOffer extends ObjectModel
 			$id_lang = Configuration::get('PS_LANG_DEFAULT');
 		if($this->id)
 		{
-			$this->products  = $this->getProducts($id_lang);
+			$this->products  = $this->getProducts($id_lang, $light);
 			$this->images		 = $this->getImages($id_lang);
 			if(!$light)
 			{
+				
 				$this->prices = $this->getPricesOffer();
 				$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
 			}
@@ -153,14 +154,13 @@ class FlashSalesOffer extends ObjectModel
 		return false;
 	}
 
-	public function getProducts($id_lang)
+	public function getProducts($id_lang, $light)
 	{
 		$results = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` WHERE `id_flashsales_offer` = ' . $this->id);
 		$products = array();
-
 		foreach($results AS $result)
 		{
-			$product = new Product($result['id_product'], true, $id_lang);
+			$product = new Product((int)$result['id_product'], !$light, $id_lang);
 			$images = $product->getImages((int)$id_lang);
 			$productImages = array();
 			foreach ($images AS $k => $image)

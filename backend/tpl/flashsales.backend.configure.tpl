@@ -8,6 +8,8 @@
 			<p><b>{l s='Define settings and place this URL in crontab or call it manually daily:' mod=$module_name}</b></p>
 			<ul>
 				<li>{l s='Update next period' mod=$module_name} <b>{$cron_url}&action=1</b></li>
+				<li>{l s='Update current period' mod=$module_name} <b>{$cron_url}&action=2</b></li>
+				<li>{l s='Clear all cache' mod=$module_name} <b>{$cron_url}&action=3</b></li>
 			</ul>
 		</fieldset>
 		{foreach from=$configs item=config name=configLoop}
