@@ -1,3 +1,4 @@
+{if isset($flashsalesoffer)}
 {assign var='price' value={convertPrice price=$flashsalesoffer->prices['min_price']}}
 {assign var='price_reduce' value={convertPrice price=$flashsalesoffer->prices['min_price_reduce']}}
 {assign var='priceSplit' value=','|explode:$price}
@@ -29,7 +30,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 	{if $flashsalesoffer->prices['reduction'] AND $flashsalesoffer->prices['reduction'].reduction_type == 'percentage'}
 		<span class="remise">-{$flashsalesoffer->prices['reduction'].reduction*100}%</span>
 	{/if}
-	</div>
+</div>
 <div id="product-highlight">
 	<div id="container-product-display-product-page-view">
 		{foreach $flashsalesoffer->products key=key_product item=fproduct}
@@ -134,9 +135,9 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 		{/foreach}
 	</div><!-- End#product-highlight -->
 </div>
-
+{if $flashsalesoffer_others|@count gt 1}
 <div id="other-product">
-	<p class="other_offer_title">Les autres offres</p>
+	<p class="other_offer_title">{l s='Les autres offres'}</p>
 	<ul class="clearfix">
 		{foreach $flashsalesoffer_others key=offer_key item=offer}
 			{assign var="image" value=$offer->images[0]}
@@ -165,3 +166,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 		{/foreach}
 	</ul>
 </div><!-- End#other-product -->
+{/if}
+{else}
+{include file="$tpl_dir./errors.tpl"}
+{/if}

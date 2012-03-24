@@ -590,7 +590,7 @@ class FlashSales extends Module
 					{
 						foreach($results AS $result)
 						{
-							$flashsales_offer = new FlashsalesOffer($result['id_flashsales_offer'], NULL, true);
+							$flashsales_offer = new FlashSalesOffer($result['id_flashsales_offer'], NULL);
 							$flashsales_offer->date_start = $nextPeriod;
 							$flashsales_offer->date_end		= date('Y-m-d', (int)(Configuration::get($this->_abbreviation . '_NEXT_PERIOD') + (int)(Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD'))));
 							$flashsales_offer->update();
@@ -616,21 +616,29 @@ class FlashSales extends Module
 	// ---------------------------
 	public function hookHeader($params)
 	{
-		global $smarty, $cookie;
-		
+		global $smarty, $cookie, $link, $page_name;
+
 		$vars = array(
 			'path'		=> $this->_path,
 			'id_lang' => (int)$cookie->id_lang,
 			'logged'	=> isset($cookie->id_customer) && $cookie->isLogged() ? true : false,
 		);
 
-		Tools::addCSS($this->_path . $this->name . '.css', 'all');
+		//Tools::addCSS($this->_path . $this->name . '.css', 'all');
 		Tools::addJS($this->_path	 . $this->name . '.js');
 
 		foreach($this->_hooks as $hook)
 		{
 			if($hook['insert'])
-				$smarty->assign('HOOK_' . strtoupper($hook['name']), Module::hookExec($hook['name']));
+			{
+				if($hook['name'] != $this->name . 'Home')
+					$smarty->assign('HOOK_' . strtoupper($hook['name']), Module::hookExec($hook['name']));
+				else
+				{
+					if($smarty->tpl_vars['page_name']->value == 'index')
+						$smarty->assign('HOOK_' . strtoupper($hook['name']), Module::hookExec($hook['name']));
+				}
+			}
 		}
 		$smarty->assign('module_header_' . strtolower($this->name), $vars);
 	}

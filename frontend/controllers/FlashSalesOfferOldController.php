@@ -1,4 +1,6 @@
 <?php
+include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesOffer.php';
+include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesCategory.php';
 class FlashSalesOfferOldControllerCore extends FrontController
 {
 	public $php_self = 'flashsalesofferold.php';
@@ -20,7 +22,7 @@ class FlashSalesOfferOldControllerCore extends FrontController
 				if (!self::$cookie->isLogged())
 				{
 					$customer_email = Tools::getValue('customer_email');
-					
+
 					if (empty($customer_email) || !Validate::isEmail($customer_email) || $customer_email == 'your@email.com')
 					{
 						// Empty email
@@ -47,18 +49,49 @@ class FlashSalesOfferOldControllerCore extends FrontController
 
 				if($insert)
 				{
-					Db::getInstance()->Execute('REPLACE INTO `'._DB_PREFIX_.'flashsales_offer_mailalert` (`id_flashsales_offer`, `id_customer`, `customer_email`) VALUES ('.(int)($id_flashsales_offer).', '.(int)($id_customer).', \''.pSQL($customer_email).'\'');
+					Db::getInstance()->Execute('REPLACE INTO `'._DB_PREFIX_.'flashsales_offer_mailalert` (`id_flashsales_offer`, `id_customer`, `customer_email`, `date_add`, `date_upd`) VALUES ('.(int)($id_flashsales_offer).', '.(int)($id_customer).', \''.pSQL($customer_email).'\', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())');
 					self::$smarty->assign('mailalert_confirm', true);
 				}
 			}
 		}
-	}
 
-	public function process()
-	{
-		parent::process();
+		// Categories
+		$categories = FlashSalesCategory::getCategories((int)(self::$cookie->id_lang), false, false);
+		if(isset($_GET['category']))
+		{
+			$id_category = (int)Tools::getValue('category');
+			self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category));
+			self::$smarty->assign('categories', $categories);
+			self::$smarty->assign('current_category', $id_category);
+		}
+		else
+		{
+			self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang)));
+			self::$smarty->assign('categories', $categories);
+			self::$smarty->assign('current_category', 0);
+		}
+		
+		// Search
+		if (Tools::isSubmit('SubmitOfferSearch'))
+		{
+			$search_text = Tools::getValue('search_text');
+			$expr = Search::sanitize($search_text, (int)self::$cookie->id_lang);
+			$sql = 'SELECT DISTINCT(fo.`id_flashsales_offer`)
+			FROM `'._DB_PREFIX_.'flashsales_offer_lang` fol
+			INNER JOIN `'._DB_PREFIX_.'flashsales_offer` fo ON (fo.`id_flashsales_offer` = fol.`id_flashsales_offer` AND fol.`id_lang` = '.(int)(self::$cookie->id_lang).')
+			WHERE (`name` LIKE  \'%' . pSQL($expr) . '%\' OR `description` LIKE  \'%' . pSQL($expr) . '%\' OR `description_short` LIKE  \'%' . pSQL($expr) . '%\')
+			AND fo.`active` = 1';
+			if(Tools::getValue('search_type') == 1)
+				$sql .= ' AND fo.`date_start` = \'' . date('Y-m-d') . '\'';
+			else
+				$sql .= ' AND fo.`date_end` <= \'' . date('Y-m-d') . '\'';
+			$results = Db::getInstance()->ExecuteS($sql);
+			$offers = array();
+			foreach($results AS $result)
+				$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], (int)self::$cookie->id_lang, 'normal');
 
-		self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang)));
+			self::$smarty->assign('offers', $offers);
+		}
 	}
 
 	public function setMedia()
@@ -71,6 +104,7 @@ class FlashSalesOfferOldControllerCore extends FrontController
 	public function displayContent()
 	{
 		parent::displayContent();
+		self::$smarty->assign('pictofferSize', Image::getSize('pictoffer'));
 		self::$smarty->display(_PS_THEME_DIR_. $this->tpl_file);
 	}
 }

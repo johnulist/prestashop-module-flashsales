@@ -44,7 +44,7 @@
 					<div id="right-side">
 						<h2>{$offer->name|escape:'htmlall':'UTF-8'}</h2>
 						<h3>{$offer->description_short}</h3>
-						<p>à partir de</p>
+						<p>{l s='à partir de'}</p>
 						<div class="price-container clearfix">
 							{assign var='price' value={convertPrice price=$offer->prices['min_price']}}
 							{assign var='price_reduce' value={convertPrice price=$offer->prices['min_price_reduce']}}
@@ -85,9 +85,9 @@
 			<i class="sprite next"></i>		
 		</a>
 	</div><!-- End#product-highlight -->
-{if $module.offers|@count gt 0}
+{if $module.offers|@count gt 1}
 	<div id="other-product" class="clearfix">
-		<p class="other-product-title">Les autres offres</p>
+		<p class="other-product-title">{l s='Les autres offres'}</p>
 		<ul>
 		{foreach $module.offers key=offer_key item=offer}
 			{assign var="image" value=$offer->images[0]}

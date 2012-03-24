@@ -55,21 +55,28 @@ class FlashSalesOffer extends ObjectModel
 		'meta_description' => 'isGenericName'
 	);
 
-
-	public function __construct($id_flashsales_offer = NULL, $id_lang = NULL, $light = false)
+	public function __construct($id_flashsales_offer = NULL, $id_lang = NULL, $type = false)
 	{
 		parent::__construct($id_flashsales_offer, $id_lang);
 		if(!$id_lang)
 			$id_lang = Configuration::get('PS_LANG_DEFAULT');
-		if($this->id)
+
+		if($this->id && $type)
 		{
-			$this->products  = $this->getProducts($id_lang, $light);
-			$this->images		 = $this->getImages($id_lang);
-			if(!$light)
+			switch($type)
 			{
-				
-				$this->prices = $this->getPricesOffer();
-				$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
+				case 'normal':
+				default:
+					$this->images		 = $this->getImages($id_lang);
+					$this->prices = $this->getPricesOffer();
+					$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
+					break;
+				case 'fully':
+					$this->products  = $this->getProducts($id_lang);
+					$this->images		 = $this->getImages($id_lang);
+					$this->prices = $this->getPricesOffer();
+					$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
+					break;
 			}
 		}
 	}
@@ -154,13 +161,13 @@ class FlashSalesOffer extends ObjectModel
 		return false;
 	}
 
-	public function getProducts($id_lang, $light)
+	public function getProducts($id_lang)
 	{
 		$results = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` WHERE `id_flashsales_offer` = ' . $this->id);
 		$products = array();
 		foreach($results AS $result)
 		{
-			$product = new Product((int)$result['id_product'], !$light, $id_lang);
+			$product = new Product((int)$result['id_product'], true, $id_lang);
 			$images = $product->getImages((int)$id_lang);
 			$productImages = array();
 			foreach ($images AS $k => $image)
@@ -576,7 +583,7 @@ class FlashSalesOffer extends ObjectModel
 			ORDER BY `default` DESC');
 		$offers = array();
 		foreach($results AS $result)
-			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang);
+			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang, 'normal');
 
 		return $offers;
 	}
@@ -591,20 +598,21 @@ class FlashSalesOffer extends ObjectModel
 			ORDER BY `default` DESC');
 		$offers = array();
 		foreach($results AS $result)
-			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang);
+			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang, 'normal');
 
 		return $offers;
 	}
 
-	public static function getOffersBeforeTheDay($date_start, $id_lang)
+	public static function getOffersBeforeTheDay($date_start, $id_lang, $id_category = false)
 	{
 		$results = Db::getInstance()->ExecuteS('SELECT `id_flashsales_offer`
 			FROM `'._DB_PREFIX_.'flashsales_offer`
 			WHERE `date_end` <= \'' . $date_start . '\'
-			AND `active` = 1');
+			AND `active` = 1' .
+			($id_category ? ' AND id_flashsales_category = ' . (int)$id_category : ''));
 		$offers = array();
 		foreach($results AS $result)
-			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang);
+			$offers[] = new FlashSalesOffer($result['id_flashsales_offer'], $id_lang, 'normal');
 
 		return $offers;
 	}
