@@ -55,9 +55,9 @@ class FlashSales extends Module
 				'tpl_file' => 'flashsalesoffer.tpl'
 			),
 			2 => array(
-				'root_file' => 'flashsalesofferold.php',
+				'root_file' => 'flashsalescatalog.php',
 				'controller' => 'FlashSalesOfferOldController.php',
-				'tpl_file' => 'flashsalesofferold.tpl'
+				'tpl_file' => '.tpl'
 			)
 		);
 
@@ -418,6 +418,12 @@ class FlashSales extends Module
 				'name' => strtolower($this->name) . '_cache_id',
 				'type'	=> false,
 				'default' => strtoupper(Tools::passwdGen(10))
+			),
+			8 => array(
+				'config_name' => $this->_abbreviation . '_OFFERS_PER_PAGE',
+				'name' => strtolower($this->name) . '_offers_per_page',
+				'type'	=> 'text',
+				'default' => 8
 			)
 		);
 

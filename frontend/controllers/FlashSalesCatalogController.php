@@ -1,17 +1,29 @@
 <?php
 include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesOffer.php';
 include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesCategory.php';
-class FlashSalesOfferOldControllerCore extends FrontController
+class FlashSalesCatalogControllerCore extends FrontController
 {
-	public $php_self = 'flashsalesofferold.php';
-	public $tpl_file = 'flashsalesofferold.tpl';
+	public $php_self = 'flashsalescatalog.php';
+	public $tpl_file = 'flashsalescatalog.tpl';
 
 	public function preProcess()
 	{
+		$oldOffers = false;
+		$searchOffer = false;
+
+		if(isset($_GET['old']) || isset($_POST['old']))
+			$oldOffers = true;
+
+		if(isset($_GET['category']) || isset($_POST['category']))
+			$id_category = (int)Tools::getValue('category');
+		else
+			$id_category = 0;
+
 		$this->canonicalRedirection();
 
 		parent::preProcess();
-		
+
+		// Email
 		if (Tools::isSubmit('SubmitMailAlert'))
 		{
 			$id_flashsales_offer = (int)(Tools::getValue('id_flashsales_offer'));
@@ -57,23 +69,13 @@ class FlashSalesOfferOldControllerCore extends FrontController
 
 		// Categories
 		$categories = FlashSalesCategory::getCategories((int)(self::$cookie->id_lang), false, false);
-		if(isset($_GET['category']))
-		{
-			$id_category = (int)Tools::getValue('category');
-			self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category));
-			self::$smarty->assign('categories', $categories);
-			self::$smarty->assign('current_category', $id_category);
-		}
-		else
-		{
-			self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang)));
-			self::$smarty->assign('categories', $categories);
-			self::$smarty->assign('current_category', 0);
-		}
+		self::$smarty->assign('categories', $categories);
+		self::$smarty->assign('current_category', $id_category);
 		
 		// Search
 		if (Tools::isSubmit('SubmitOfferSearch'))
 		{
+
 			$search_text = Tools::getValue('search_text');
 			$expr = Search::sanitize($search_text, (int)self::$cookie->id_lang);
 			$sql = 'SELECT DISTINCT(fo.`id_flashsales_offer`)
@@ -81,10 +83,13 @@ class FlashSalesOfferOldControllerCore extends FrontController
 			INNER JOIN `'._DB_PREFIX_.'flashsales_offer` fo ON (fo.`id_flashsales_offer` = fol.`id_flashsales_offer` AND fol.`id_lang` = '.(int)(self::$cookie->id_lang).')
 			WHERE (`name` LIKE  \'%' . pSQL($expr) . '%\' OR `description` LIKE  \'%' . pSQL($expr) . '%\' OR `description_short` LIKE  \'%' . pSQL($expr) . '%\')
 			AND fo.`active` = 1';
-			if(Tools::getValue('search_type') == 1)
-				$sql .= ' AND fo.`date_start` = \'' . date('Y-m-d') . '\'';
-			else
+			if($oldOffers)
 				$sql .= ' AND fo.`date_end` <= \'' . date('Y-m-d') . '\'';
+			else
+				$sql .= ' AND fo.`date_start` <= \'' . date('Y-m-d') . '\'';
+			if($id_category)
+				$sql .= ' AND fo.`id_flashsales_category` = ' . (int)$id_category;
+
 			$results = Db::getInstance()->ExecuteS($sql);
 			$offers = array();
 			foreach($results AS $result)
@@ -92,6 +97,12 @@ class FlashSalesOfferOldControllerCore extends FrontController
 
 			self::$smarty->assign('offers', $offers);
 		}
+		elseif($oldOffers)
+			$offers = self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category));
+		else
+			$offers = self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category, true));
+
+		$this->pagination(count($offers));
 	}
 
 	public function setMedia()
@@ -105,7 +116,58 @@ class FlashSalesOfferOldControllerCore extends FrontController
 	{
 		parent::displayContent();
 		self::$smarty->assign('pictofferSize', Image::getSize('pictoffer'));
+		self::$smarty->assign('current_period', date('Y-m-d', Configuration::get('FS_CURRENT_PERIOD')));
 		self::$smarty->display(_PS_THEME_DIR_. $this->tpl_file);
+	}
+
+	public function pagination($nbOffers = 8)
+	{
+		if (!self::$initialized)
+			$this->init();
+		$offersPerPage = (int)(Configuration::get('FS_OFFERS_PER_PAGE'));
+		$nArray = $offersPerPage != 8 ? array($offersPerPage, 8, 20, 50) : array(8, 20, 50);
+		// Clean duplicate values
+		$nArray = array_unique($nArray);
+		asort($nArray);
+		$this->n = abs((int)(Tools::getValue('n', ((isset(self::$cookie->nb_item_per_page) AND self::$cookie->nb_item_per_page >= 8) ? self::$cookie->nb_item_per_page : $offersPerPage))));
+		
+		$this->p = abs((int)(Tools::getValue('p', 1)));
+
+		$current_url = Tools::htmlentitiesUTF8($_SERVER['REQUEST_URI']);
+		//delete parameter page
+		$current_url = preg_replace('/(\?)?(&amp;)?p=\d+/', '$1', $current_url);
+
+		$range = 2; /* how many pages around page selected */
+
+		if ($this->p < 0)
+			$this->p = 0;
+
+		if (isset(self::$cookie->nb_item_per_page) AND $this->n != self::$cookie->nb_item_per_page AND in_array($this->n, $nArray))
+			self::$cookie->nb_item_per_page = $this->n;
+
+		if ($this->p > ($nbOffers / $this->n))
+			$this->p = ceil($nbOffers / $this->n);
+		$pages_nb = ceil($nbOffers / (int)($this->n));
+
+		$start = (int)($this->p - $range);
+		if ($start < 1)
+			$start = 1;
+		$stop = (int)($this->p + $range);
+		if ($stop > $pages_nb)
+			$stop = (int)($pages_nb);
+		self::$smarty->assign('nb_offers', $nbOffers);
+		$pagination_infos = array(
+			'offers_per_page' => $offersPerPage,
+			'pages_nb' => $pages_nb,
+			'p' => $this->p,
+			'n' => $this->n,
+			'nArray' => $nArray,
+			'range' => $range,
+			'start' => $start,
+			'stop' => $stop,
+			'current_url' => $current_url
+		);
+		self::$smarty->assign($pagination_infos);
 	}
 }
 ?>

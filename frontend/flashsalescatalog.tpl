@@ -8,7 +8,7 @@
 			$('#category').bind('change', function () {
 				var id_category = $(this).val();
 					if (id_category)
-						window.location = baseDir + 'flashsalesofferold?category=' + id_category;
+						window.location = baseDir + 'flashsalescatalog?category=' + id_category{if isset($smarty.get.old)}+ '&old=1'{/if};
 					return false;
 				});
 			});
@@ -21,9 +21,12 @@
 			<option value="{$category.id_flashsales_category}" {if $current_category eq $category.id_flashsales_category}selected="selected"{/if}>{$category.name}</option>
 			{/foreach}
 		</select>
-		<form action="" method="post">
-			<input type="text" name="search_text" placeholder="{l s='Recherche...'}">
-			<input type="hidden" name="search_type" value="2">
+		<form action="{$link->getPageLink('flashsalescatalog.php', true)}" method="post">
+			<input type="text" name="search_text" placeholder="{l s='Recherche...'}" value="{if isset($smarty.post.search_text)}{$smarty.post.search_text|htmlentities:$ENT_QUOTES:'utf-8'|stripslashes}{/if}">
+			{if isset($smarty.get.old)}
+			<input type="hidden" name="old" value="1">
+			{/if}
+			<input type="hidden" name="category" value="{$current_category}">
 			<input type="submit" name="SubmitOfferSearch" class="sprite send">
 		</form>
 	</div>
@@ -51,7 +54,7 @@
 			{if $offer->nbProductsAlreadyBuy > 0}
 			<p class="catalogue-sell-product">{$offer->nbProductsAlreadyBuy} {l s='produits achetés !'}</p>
 			{/if}
-		<a href="" class="sprite acheter"></a>
+		<a href="{$link->getPageLink('flashsalesoffer.php')}?id_flashsales_offer={$offer->id}" class="sprite acheter {if $offer->date_start neq $current_period}offline{/if}"></a>
 		</div>
 		<div class="catalogue-right-side">
 			<p>{l s='à partir de'}</p>
@@ -63,10 +66,10 @@
 				<span class="remise">-{$offer->prices['reduction'].reduction*100}%</span>
 			{/if}
 		</div>
-		<div class="alerte-mail">
+		<div class="alerte-mail" style="display: none">
 			<p class="alerte-mail-title">{l s='J\'achète'}</p>
 			<p class="alerte-mail-what">{l s='Laissez-nous votre email, nous vous recontacterons lors de la prochaine mise en vente de ce produit.'}</p>
-			<form action="{$link->getPageLink('flashsalesofferold.php', true)}" method="post">
+			<form action="{$link->getPageLink('flashsalescatalog.php', true)}" method="post">
 				<input type="email" placeholder="Email" required name="customer_email">
 				<input type="hidden" name="id_flashsales_offer" value="{$offer->id}">
 				<input type="submit" name="SubmitMailAlert" class="sprite">
@@ -76,20 +79,3 @@
 	</div><!-- End#catalogue-product -->
 	{/foreach}
 </div>
-{if $offers|@count gt 7}
-<div id="pagination">
-	<ul>
-		<li class="page"><a class="selected" href="" title="">1</a></li>
-		<li class="page"><a href="" title="">2</a></li>
-		<li class="page"><a href="" title="">3</a></li>
-		<li class="page"><a href="" title="">4</a></li>
-		<li class="page"><a href="" title="">5</a></li>
-		<li class="page"><a href="" title="">6</a></li>
-	</ul>
-	<p>...</p>
-	<ul>
-		<li class="page"><a href="" title="">34</a></li>
-		<li class="page"><a href="" title="">35</a></li>
-	</ul>
-</div>
-{/if}

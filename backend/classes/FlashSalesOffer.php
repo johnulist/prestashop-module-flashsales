@@ -603,11 +603,11 @@ class FlashSalesOffer extends ObjectModel
 		return $offers;
 	}
 
-	public static function getOffersBeforeTheDay($date_start, $id_lang, $id_category = false)
+	public static function getOffersBeforeTheDay($date_start, $id_lang, $id_category = false, $includeToday = false)
 	{
 		$results = Db::getInstance()->ExecuteS('SELECT `id_flashsales_offer`
 			FROM `'._DB_PREFIX_.'flashsales_offer`
-			WHERE `date_end` <= \'' . $date_start . '\'
+			WHERE `' . ($includeToday ? 'date_start' : 'date_end') . '` <= \'' . $date_start . '\'
 			AND `active` = 1' .
 			($id_category ? ' AND id_flashsales_category = ' . (int)$id_category : ''));
 		$offers = array();
