@@ -1,8 +1,8 @@
 <div id="highlight">
 	{include file="$tpl_dir./breadcrumb-hightlight.tpl"}
 	<i class="sprite border-highlight"></i>
-	<h2 class="highlight-title-product">{l s='Le catalogue'}</h2>
-	<p class="clearfix">{l s='Retrouvez ici l\'ensemble de nos offres'}</p>
+	<span class="highlight-title-product">{l s='Le catalogue'}</span>
+	<h1 class="clearfix">{l s='Retrouvez ici l\'ensemble de nos offres'}</h1>
 	<script>
 		$(function(){
 			$('#category').bind('change', function () {
@@ -49,8 +49,8 @@
 			<div class="picture-catalogue">
 				<img src="{$link->getImageLink('offer', $images[0], 'pictoffer')}" class="pic-catalogue" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
 			</div>
-			<p class="catalogue-title-product">{$offer->name|escape:'htmlall':'UTF-8'}</p>
-			<p class="catalogue-desc-product">{$offer->description|strip_tags}</p>
+			<h2 class="catalogue-title-product">{$offer->name|escape:'htmlall':'UTF-8'}</h2>
+			<h3 class="catalogue-desc-product">{$offer->description|strip_tags}</h3>
 			{if $offer->nbProductsAlreadyBuy > 0}
 			<p class="catalogue-sell-product">{$offer->nbProductsAlreadyBuy} {l s='produits achetés !'}</p>
 			{/if}

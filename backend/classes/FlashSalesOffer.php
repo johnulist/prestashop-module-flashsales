@@ -63,20 +63,14 @@ class FlashSalesOffer extends ObjectModel
 
 		if($this->id && $type)
 		{
-			switch($type)
+			$this->images		 = $this->getImages($id_lang);
+			$this->prices = $this->getPricesOffer();
+			$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
+			$this->offerLink = self::getOfferLink($this);
+			if($type == 'fully')
 			{
-				case 'normal':
-				default:
-					$this->images		 = $this->getImages($id_lang);
-					$this->prices = $this->getPricesOffer();
-					$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
-					break;
-				case 'fully':
-					$this->products  = $this->getProducts($id_lang);
-					$this->images		 = $this->getImages($id_lang);
-					$this->prices = $this->getPricesOffer();
-					$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
-					break;
+				$this->products  = $this->getProducts($id_lang);
+				$this->prices = $this->getPricesOffer();
 			}
 		}
 	}
@@ -621,6 +615,34 @@ class FlashSalesOffer extends ObjectModel
 	{
 		$result = Db::getInstance()->getRow('SELECT COUNT(f.`id_flashsales_offer`) AS `number` FROM `'._DB_PREFIX_.'flashsales_offer` f WHERE f.`date_start` = \'' . $date_start . '\'');
 		return $result['number'];
+	}
+
+	public static function getOfferLink($flashsales_offer)
+	{
+		global $cookie, $link;
+		$allow = (int)Configuration::get('PS_REWRITING_SETTINGS');
+		if (is_object($flashsales_offer))
+		{
+			$link = '';
+			if ($allow == 1)
+			{
+				$link .= (_PS_BASE_URL_.__PS_BASE_URI__.$link->getLangLink((int)$id_lang));
+
+				$link .= (int)$flashsales_offer->id.'-';
+				if (is_array($flashsales_offer->link_rewrite))
+					$link.= $flashsales_offer->link_rewrite[(int)$cookie->id_lang];
+				else 
+				 	$link.= $flashsales_offer->link_rewrite;
+
+				$link .= '.html';
+			}
+			else
+				$link .= (_PS_BASE_URL_.__PS_BASE_URI__.'flashsalesoffer.php?id_flashsales_offer='.(int)$flashsales_offer->id);
+
+			return $link;
+		}
+		else
+			return _PS_BASE_URL_.__PS_BASE_URI__.'flashsalesoffer.php?id_flashsales_offer='.(int)$flashsales_offer;
 	}
 
 	private static function _distinctMultiDimensionalArray($array, $keySearch, $overwrite = false, $exception = array())

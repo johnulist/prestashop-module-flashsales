@@ -17,7 +17,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 <div id="highlight">
 	{include file="$tpl_dir./breadcrumb-hightlight.tpl"}
 	<i class="sprite border-highlight"></i>
-	<h2 class="highlight-title-product">{$flashsalesoffer->name|escape:'htmlall':'UTF-8'}</h2>
+	<h1 class="highlight-title-product">{$flashsalesoffer->name|escape:'htmlall':'UTF-8'}</h1>
 	<div id="info-product">
 	<p>{l s='à partir de'}</p>
 	<div class="price-container clearfix">
@@ -74,8 +74,8 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 		//]]>
 		</script>
 			<div class="left-side">
-				<h3>{$product->name|escape:'htmlall':'UTF-8'}</h3>
-				<p>{$product->description|strip_tags}</p>
+				<h2>{$product->name|escape:'htmlall':'UTF-8'}</h2>
+				<h3>{$product->description|strip_tags}</h3>
 				<div class="thumbnail-sub-product">
 					<ul>
 						{foreach $images item=image}
@@ -125,10 +125,10 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 				<input type="text" name="qty" id="quantity_wanted" value="1">
 				<a href="" title="" class="sprite acheter"></a>
 				<a href="" title="" class="offer-to-friends"><i class="sprite cadeau"></i>{l s='Offrez-le à un ami'}</a>
-				<ul class="share">
-					<li><a href="" title=""><i class="sprite fb"></i></a></li>
-					<li><a href="" title=""><i class="sprite tw"></i></a></li>
-					<li><a href="" title=""><i class="sprite mail"></i></a></li>
+				<ul class="addthis_toolbox addthis_default_style share" addthis:ui_language="fr" addthis:url="{$flashsalesoffer->offerLink}" addthis:title="{l s='Découvrez l\'offre du jour sur #Only24h :'} {$flashsalesoffer->name|escape:'htmlall':'UTF-8'}" addthis:description="{$flashsalesoffer->description_short|escape:'htmlall':'UTF-8'}">
+					<li><a class="addthis_button_facebook at300b"></a></li>
+					<li><a class="addthis_button_twitter"><i class="sprite tw"></i></a></li>
+					<li><a class="addthis_button_email" addthis:ui_language="fr"></a></li>
 				</ul>
 			</div>
 		</div>

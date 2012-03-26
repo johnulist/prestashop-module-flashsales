@@ -61,10 +61,10 @@
 						{if $offer->nbProductsAlreadyBuy > 0}
 						<p class="product-sell">{l s='Déjà'} {$offer->nbProductsAlreadyBuy} {l s='produits achetés !'}</p>
 						{/if}
-						<a href="{$link->getPageLink('flashsalesoffer.php')}?id_flashsales_offer={$offer->id}" title="" class="sprite acheter"></a>
-						<a href="{$link->getPageLink('flashsalesoffer.php')}?id_flashsales_offer={$offer->id}" title="{$link->getPageLink('flashsalesoffer.php')}?id_flashsales_offer={$offer->id}" class="offer-to-friends"><i class="sprite cadeau"></i>{l s='Offrez-le à un ami'}</a>
+						<a href="{$offer->offerLink}" class="sprite acheter"></a>
+						<a href="{$offer->offerLink}" class="offer-to-friends"><i class="sprite cadeau"></i>{l s='Offrez-le à un ami'}</a>
 						<p class="share-with-friends">{l s='Partager avec mes amis'}</p>
-						<ul class="addthis_toolbox addthis_default_style share" addthis:ui_language="fr" addthis:url="{$link->getPageLink('flashsalesoffer.php')}?id_flashsales_offer={$offer->id}" addthis:title="{l s='Découvrez l\'offre du jour sur #Only24h :'} {$offer->name|escape:'htmlall':'UTF-8'}" addthis:description="{$offer->description_short|escape:'htmlall':'UTF-8'}">
+						<ul class="addthis_toolbox addthis_default_style share" addthis:ui_language="fr" addthis:url="{$offer->offerLink}" addthis:title="{l s='Découvrez l\'offre du jour sur #Only24h :'} {$offer->name|escape:'htmlall':'UTF-8'}" addthis:description="{$offer->description_short|escape:'htmlall':'UTF-8'}">
 							<li><a class="addthis_button_facebook at300b"></a></li>
 							<li><a class="addthis_button_twitter"><i class="sprite tw"></i></a></li>
 							<li><a class="addthis_button_email" addthis:ui_language="fr"></a></li>

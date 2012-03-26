@@ -423,6 +423,7 @@ class FlashSales extends Module
 				'config_name' => $this->_abbreviation . '_OFFERS_PER_PAGE',
 				'name' => strtolower($this->name) . '_offers_per_page',
 				'type'	=> 'text',
+				'title'		=> $this->l('Offers per page'),
 				'default' => 8
 			)
 		);
@@ -666,7 +667,7 @@ class FlashSales extends Module
 		{
 			$vars = array(
 				'module_name' => strtoupper($this->name),
-				'offers' => FlashsalesOffer::getOffersForTheDay(date('Y-m-d', (int)Configuration::get('FS_CURRENT_PERIOD')), (int)$cookie->id_lang)
+				'offers' => FlashsalesOffer::getOffersForTheDay(date('Y/m/d', (int)Configuration::get('FS_CURRENT_PERIOD')), (int)$cookie->id_lang)
 			);
 
 			foreach($this->_imageType AS $image)
