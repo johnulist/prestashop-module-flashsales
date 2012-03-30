@@ -576,11 +576,14 @@ class FlashSales extends Module
 				{
 					// Get offers best demand
 					$nbOffersMissing = $nbOffersNeeded - $nbOffersOfTheDay;
-					$sql = 'SELECT fo.`id_flashsales_offer`, COUNT(fom.`id_flashsales_offer`) AS `nb_demand`
+					$sql = 'SELECT fo.`id_flashsales_offer`, (
+						SELECT COUNT( fom.`id_flashsales_offer` ) 
+						FROM  `flashsales_offer_mailalert` fom
+						WHERE fom.`id_flashsales_offer` = fo.`id_flashsales_offer`
+					) AS  `nb_demand`
 					FROM `'._DB_PREFIX_.'flashsales_offer` fo
-					LEFT JOIN `'._DB_PREFIX_.'flashsales_offer_mailalert` fom ON (fom.`id_flashsales_offer` = fo.`id_flashsales_offer`)
 					WHERE fo.`date_start` < CURRENT_DATE()
-					ORDER by `nb_demand`
+					ORDER by `nb_demand` DESC
 					LIMIT ' . (int)$nbOffersMissing;
 					$results = Db::getInstance()->ExecuteS($sql);
 					if(empty($results))
