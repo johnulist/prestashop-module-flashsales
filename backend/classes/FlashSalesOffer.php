@@ -240,14 +240,19 @@ class FlashSalesOffer extends ObjectModel
 					$combinations[$id_product_attribute]['list'] = $attributeList;
 				}
 			}
-			$products[] = array(
-				'product' => $product,
-				'images' => $productImages,
-				'groups' => $groups,
-				'combinations' => $combinations,
-				'colors' => (sizeof($colors) AND $product->id_color_default) ? $colors : false,
-				'combinationImages' => $combinationImages
-			);
+			$tempProduct = $products[] = array();
+			$tempProduct['product'] = $product;
+			$tempProduct['images'] = $productImages;
+			$tempProduct['colors'] = (sizeof($colors) AND $product->id_color_default) ? $colors : false;
+
+			if(isset($groups))
+				$tempProduct['groups'] = $groups;
+
+			if(isset($combinationImages))
+				$tempProduct['combinationImages'] = $combinationImages;
+
+			if(isset($combinations))
+				$tempProduct['combinations'] = $combinations;
 		}
 
 		return $products;
