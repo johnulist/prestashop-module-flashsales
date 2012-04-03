@@ -37,7 +37,7 @@
 {/if}
 <div id="list-product">
 	{if $offers|@count eq 0}
-	<p class="warning">{l s='Aucune offre dans cette catégorie.'}</p>
+	<p class="warning"><i class="sprite warning_ico"></i> {l s='Aucune offre dans cette catégorie.'}</p>
 	{/if}
 	{foreach $offers item=offer}
 	{assign var='price' value={convertPrice price=$offer->prices['min_price']}}
