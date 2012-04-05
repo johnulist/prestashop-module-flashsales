@@ -253,8 +253,9 @@ class FlashSalesOffer extends ObjectModel
 
 			if(isset($combinations))
 				$tempProduct['combinations'] = $combinations;
+				
+			$products[] = $tempProduct;
 		}
-		$products[] = $tempProduct;
 
 		return $products;
 	}
@@ -301,11 +302,21 @@ class FlashSalesOffer extends ObjectModel
 	public function getImages($id_lang)
 	{
 		$results = Db::getInstance()->ExecuteS('SELECT `id_image` FROM `'._DB_PREFIX_.'flashsales_offer_image` WHERE `id_flashsales_offer` = ' . $this->id);
-		$images = array();
-		foreach($results AS $result)
-			$images[] = $result['id_image'];
+		foreach($results AS &$result)
+		{
+			$explode = explode('-', $result['id_image']);
+			if(isset($explode[1]))
+			{
+				$product = new Product($explode[0], false, $id_lang);
 
-		return $images;
+				$result['imgIds'] = $result['id_image'];
+				$result['product_link_rewrite'] = $product->link_rewrite;
+			}
+			else
+				unset($result['id_image']);
+		}
+
+		return $results;
 	}
 
 	public static function getAllProducts($id_lang, $start, $limit, $orderBy, $orderWay, $id_flashsales_offer = false, $checked = false, $id_category = false, $only_active = false)
@@ -385,7 +396,7 @@ class FlashSalesOffer extends ObjectModel
 			{
 				foreach($images AS &$image)
 				{
-					if($image['id_image'] == $fimage['id_image'])
+					if($image['id_product'] . '-' .$image['id_image'] == $fimage['id_image'])
 						$image['checked'] = 1;
 				}
 			}
@@ -396,7 +407,7 @@ class FlashSalesOffer extends ObjectModel
 			{
 				foreach($images AS &$image)
 				{
-					if($image['id_image'] == $check)
+					if($image['id_product'] . '-' .$image['id_image'] == $check)
 						$image['checked'] = 1;
 				}
 			}

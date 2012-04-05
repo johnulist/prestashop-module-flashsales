@@ -78,6 +78,9 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 				<h3>{$product->description|strip_tags}</h3>
 				<div class="thumbnail-sub-product">
 					<ul>
+					{*if $flashsalesoffer->video && $flashsalesoffer->video_forward}
+					<li class="video"><a href="http://youtu.be/{$flashsalesoffer->video}" target="_blank"><i class="sprite video_ico">{l s='Vidéo du produit'}</i></a></li>
+					{/if*}
 						{foreach $images item=image}
 						{assign var=imageIds value="`$product->id`-`$image.id_image`"}
 						<li id="thumbnail_{$image.id_image}">
@@ -89,6 +92,14 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 							</a>
 						</li>
 						{/foreach}
+						{*if $flashsalesoffer->video && $flashsalesoffer->video_forward eq 0}
+						<li class="video">
+							<a href="http://youtu.be/{$flashsalesoffer->video}" target="_blank">
+								<i class="sprite video_ico">{l s='Vidéo du produit'}</i>
+								<span>{l s='Vidéo'}</span>
+							</a>
+							</li>
+						{/if*}
 					</ul>
 				</div>
 				{assign var='productPrice' value=$product->getPrice(true, $smarty.const.NULL, 2)}

@@ -9,16 +9,29 @@
 					<div id="left-side">
 						<div class="picture">
 							{foreach $offer->images key=image_key item=image}
-							<a rel="group-picture-{$offer_key}" href="{$link->getImageLink('offer', $image, 'pictofferfancy')}" title="" class="fancybox">
-								<img src="{$link->getImageLink('offer', $image, 'pictoffer')}" alt="" class="pict-product-one pict_product_{$image_key}" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
+							<a rel="group-picture-{$offer_key}" href="{$link->getImageLink($image.product_link_rewrite, $image.imgIds, 'pictofferfancy')}" class="fancybox">
+								<img src="{$link->getImageLink($image.product_link_rewrite, $image.imgIds, 'pictoffer')}" alt="" class="pict-product-one pict_product_{$image_key}" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
 							</a>
 							{/foreach}
-							<i class="sprite loupe"></i>
+							{if $offer->video && $offer->video_forward}
+							<a rel="group-picture-{$offer_key}" href="http://youtu.be/{$offer->video}" class="fancybox video_iframe">
+								<iframe width="{$pictofferSize.width}" height="{$pictofferSize.height}" src="http://www.youtube.com/embed/{$offer->video}?showinfo=0&theme=light&wmode=opaque" frameborder="0" allowfullscreen></iframe>
+							</a>
+							{/if}
+							<i class="sprite loupe" {if $offer->video && $offer->video_forward}style="display: none"{/if}></i>
 							<div class="other-view">
 								<ul>
 									{foreach $offer->images key=image_key_tbs item=image}
-									<li class="tbs_{$image_key_tbs}"><a href="" title=""><img src="{$link->getImageLink('offer', $image, 'pictofferthumbs')}" alt=""></a></li>
+									<li class="tbs_{$image_key_tbs}"><a href="#"><img src="{$link->getImageLink('offer', $image.imgIds, 'pictofferthumbs')}" alt=""></a></li>
 									{/foreach}
+									{if $offer->video && $offer->video_forward}
+									<li class="video_iframe_thumb">
+										<a href="http://youtu.be/{$offer->video}" target="_blank">
+											<i class="sprite video_ico">{l s='Vidéo du produit'}</i>
+											<span>{l s='Vidéo'}</span>
+										</a>
+									</li>
+									{/if}
 								</ul>
 							</div>
 						</div>
