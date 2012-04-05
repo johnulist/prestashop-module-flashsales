@@ -103,13 +103,14 @@
 		<p class="other-product-title">{l s='Les autres offres'}</p>
 		<ul>
 		{foreach $module.offers key=offer_key item=offer}
-			{assign var="image" value=$offer->images[0]}
+			{assign var='image' value=$offer->images[0]['imgIds']}
+			{assign var='product_link_rewrite' value=$offer->images[0]['product_link_rewrite']}
 			{assign var='price' value={convertPrice price=$offer->prices['min_price']}}
 			{assign var='priceSplit' value=','|explode:$price}
 			{assign var='price_reduce' value={convertPrice price=$offer->prices['min_price_reduce']}}
 			<li {if $offer_key eq 0}style="display: none"{/if}>
 				<a href="" title="">
-					<div class="visuel-other-product"><img src="{$link->getImageLink('offer', $image, 'pictotheroffer')}" alt=""></div>
+					<div class="visuel-other-product"><img src="{$link->getImageLink($product_link_rewrite, $image, 'pictotheroffer')}" alt=""></div>
 					<div id="visuel-{$offer_key}" class="visuel-other-product-hover">
 						<div>
 							<i class="sprite take-a-look"></i>
