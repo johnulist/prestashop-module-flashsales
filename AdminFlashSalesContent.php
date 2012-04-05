@@ -49,7 +49,7 @@ class AdminFlashSalesContent extends AdminTab
 
 	public function postProcess()
 	{
-		if (Tools::isSubmit('submitDelflashsales_offer') OR Tools::isSubmit('submitExtendflashsales_offer') OR Tools::isSubmit('submitAddflashsales_offer') OR isset($_GET['deleteflashsales_offer']) OR Tools::isSubmit('viewflashsales_offer') OR (Tools::isSubmit('statusflashsales_offer') AND Tools::isSubmit('id_flashsales_offer')) OR (Tools::isSubmit('position') AND !Tools::isSubmit('id_flashsales_category_to_move')))
+		if (Tools::isSubmit('submitDelflashsales_offer') OR Tools::isSubmit('submitExtendflashsales_offer') OR Tools::isSubmit('submitSelectEmailMailAlertflashsales_offer') OR Tools::isSubmit('submitAddflashsales_offer') OR isset($_GET['deleteflashsales_offer']) OR Tools::isSubmit('viewflashsales_offer') OR (Tools::isSubmit('statusflashsales_offer') AND Tools::isSubmit('id_flashsales_offer')) OR (Tools::isSubmit('position') AND !Tools::isSubmit('id_flashsales_category_to_move')))
 			$this->adminFlashSalesOffer->postProcess();
 		if (Tools::isSubmit('submitDelflashsales_category') OR Tools::isSubmit('submitAddflashsales_categoryAndBackToParent') OR Tools::isSubmit('submitAddflashsales_category') OR isset($_GET['deleteflashsales_category']) OR (Tools::isSubmit('statusflashsales_category') AND Tools::isSubmit('id_flashsales_category')) OR (Tools::isSubmit('position') AND Tools::isSubmit('id_flashsales_category_to_move')))
 			$this->adminFlashSalesCategories->postProcess();

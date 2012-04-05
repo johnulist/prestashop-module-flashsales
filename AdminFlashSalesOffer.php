@@ -1,5 +1,7 @@
 <?php
 include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/FlashSalesOffer.php';
+include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/ExportToCSV.php';
+include_once _PS_MODULE_DIR_ . 'flashsales/backend/classes/LoaderTool.php';
 
 class AdminFlashSalesOffer extends AdminTab
 {
@@ -17,6 +19,9 @@ class AdminFlashSalesOffer extends AdminTab
 		$this->delete		 = true;
 		$this->view			 = false;
 		$this->duplicate = false;
+
+		$this->_dirNameExportEmail	= dirname(__FILE__) . '/exports/';
+		$this->_fileNameExportEmail = $this->l('export_emails_');
 
 		$this->_category = AdminFlashSalesContent::getCurrentFlashSalesCategory();
 
@@ -54,7 +59,7 @@ class AdminFlashSalesOffer extends AdminTab
 		$default = $this->getFieldValue($obj, 'default');
 		$id_lang = (int)$cookie->id_lang;
 		$all_products = FlashSalesOffer::getAllProducts($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id, (isset($_POST['flashsales_productBox']) ? Tools::getValue('flashsales_productBox') : false));
-		$all_images =  FlashSalesOffer::getAllImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id, (isset($_POST['flashsales_offer_image']) ? Tools::getValue('flashsales_offer_image') : false));
+		$all_images =	 FlashSalesOffer::getAllImages($id_lang, 0, 'ALL', 'id_product', 'ASC', $obj->id, (isset($_POST['flashsales_offer_image']) ? Tools::getValue('flashsales_offer_image') : false));
 		$currency = new Currency(Configuration::get('PS_CURRENCY_DEFAULT'));
 		echo '<link rel="stylesheet" href="../modules/' . strtolower($this->_module) . '/backend/css/' . strtolower($this->_module) . '.backend.admin.style.css">';
 		echo '<script src="../modules/' . strtolower($this->_module) . '/backend/js/' . strtolower($this->_module) . '.backend.admin.script.js"></script>';
@@ -191,7 +196,7 @@ class AdminFlashSalesOffer extends AdminTab
 												echo '<tr'.((isset($image['id_image']) AND isset($products[$k]['image_size'])) ? ' height="'.($products[$k]['image_size'][1] + 7).'"' : '').'>';
 												echo '	<td class="center">';
 												if ($this->delete AND (!isset($this->_listSkipDelete) OR !in_array($id, $this->_listSkipDelete)))
-												echo '		<input type="checkbox" name="flashsales_productBox[]" class="flashsales_productBox" value="'.$product['id_product'].'" class="noborder" '. (isset($product['flashsales_checked']) && $product['flashsales_checked']  ? 'checked="checked"' : '' ) .' />';
+												echo '		<input type="checkbox" name="flashsales_productBox[]" class="flashsales_productBox" value="'.$product['id_product'].'" class="noborder" '. (isset($product['flashsales_checked']) && $product['flashsales_checked']	 ? 'checked="checked"' : '' ) .' />';
 												echo '</td>';
 												echo '	<td>' . $product['id_product'] . '</td>';
 												echo '<td align="center">'.(isset($image['id_image']) ? cacheImage(_PS_IMG_DIR_.'p/'.$imageObj->getExistingImgPath().'.jpg', 'product_mini_flashsales_'.(int)($product['id_product']).(isset($product['id_product_attribute']) ? '_'.(int)($product['id_product_attribute']) : '').'.jpg', 80, 'jpg') : '--').'</td>';
@@ -225,7 +230,7 @@ class AdminFlashSalesOffer extends AdminTab
 								echo '</li>';
 							}
 						}
-		echo 		'</ul>';
+		echo		'</ul>';
 		echo '</fieldset>';
 		echo '	<p class="clear"></p>';
 		// SEO
@@ -325,9 +330,30 @@ class AdminFlashSalesOffer extends AdminTab
 		echo '<a href="'.$currentIndex.'&id_flashsales_category='.$id_flashsales_category.'&add'.$this->table.'&token='.Tools::getAdminTokenLite('AdminFlashSalesContent').'"><img src="../img/admin/add.gif" border="0" /> '.$this->l('Add a new flash sales').'</a>';
 		echo'<div style="margin:10px;">';
 		$this->displayList($token);
+		
 		echo '</div>';
 	}
-	
+
+	public function displayListFooter($token = NULL)
+	{
+		$id_flashsales_category = (int)Tools::getValue('id_flashsales_category', 1);
+		echo '</table>';
+		echo '<p>';
+		echo '<input type="hidden" name="id_flashsales_category" value="'.$id_flashsales_category.'" />';
+		if ($this->delete)
+			echo '<input type="submit" class="button" name="submitDel'.$this->table.'" value="'.$this->l('Delete selection').'" onclick="return confirm(\''.$this->l('Delete selected items?', __CLASS__, TRUE, FALSE).'\');" />';
+		echo '<input type="submit" class="button" style="float: right" name="submitSelectEmailMailAlert'.$this->table.'" value="'.$this->l('Export users who wants offers').'" />';
+		echo '</p>';
+		echo '
+				</td>
+			</tr>
+		</table>
+		<input type="hidden" name="token" value="'.($token ? $token : $this->token).'" />
+		</form>';
+		if (isset($this->_includeTab) AND sizeof($this->_includeTab))
+			echo '<br /><br />';
+	}
+
 	public function postProcess()
 	{
 		global $cookie, $link, $currentIndex;
@@ -394,9 +420,9 @@ class AdminFlashSalesOffer extends AdminTab
 							}
 						}
 
-						if(!Db::getInstance()->Execute("INSERT INTO  `" . _DB_PREFIX_ . "flashsales_product` VALUES " . $products))
+						if(!Db::getInstance()->Execute("INSERT INTO	 `" . _DB_PREFIX_ . "flashsales_product` VALUES " . $products))
 							$this->_errors[] = Tools::displayError('An error occurred while insert offer products.');
-						elseif(!Db::getInstance()->Execute("INSERT INTO  `" . _DB_PREFIX_ . "flashsales_offer_image` VALUES " . $images))
+						elseif(!Db::getInstance()->Execute("INSERT INTO	 `" . _DB_PREFIX_ . "flashsales_offer_image` VALUES " . $images))
 							$this->_errors[] = Tools::displayError('An error occurred while insert offer images.');
 						else
 							Tools::redirectAdmin($currentIndex.'&id_flashsales_category='.$flashsales_offer->id_flashsales_category.'&conf=3&token='.Tools::getAdminTokenLite('AdminFlashSalesContent'));
@@ -443,9 +469,9 @@ class AdminFlashSalesOffer extends AdminTab
 							$this->_errors[] = Tools::displayError('An error occurred while deleting offer products.');
 						elseif(!Db::getInstance()->Execute("DELETE FROM `" . _DB_PREFIX_ . "flashsales_offer_image` WHERE `id_flashsales_offer` = " . $flashsales_offer->id))
 							$this->_errors[] = Tools::displayError('An error occurred while deleting offer images.');
-						elseif(!Db::getInstance()->Execute("INSERT INTO  `" . _DB_PREFIX_ . "flashsales_product` VALUES " . $products))
+						elseif(!Db::getInstance()->Execute("INSERT INTO	 `" . _DB_PREFIX_ . "flashsales_product` VALUES " . $products))
 							$this->_errors[] = Tools::displayError('An error occurred while inserting offer products.');
-						elseif(!Db::getInstance()->Execute("INSERT INTO  `" . _DB_PREFIX_ . "flashsales_offer_image` VALUES " . $images))
+						elseif(!Db::getInstance()->Execute("INSERT INTO	 `" . _DB_PREFIX_ . "flashsales_offer_image` VALUES " . $images))
 							$this->_errors[] = Tools::displayError('An error occurred while inserting offer images.');
 						else
 							Tools::redirectAdmin($currentIndex.'&id_flashsales_category='.$flashsales_offer->id_flashsales_category.'&conf=4&token='.Tools::getAdminTokenLite('AdminFlashSalesContent'));
@@ -543,6 +569,49 @@ class AdminFlashSalesOffer extends AdminTab
 			else
 				$this->_errors[] = Tools::displayError('You must select at least one element to extend.');
 		}
+		// SELECT EMAILS
+		elseif (Tools::getValue('submitSelectEmailMailAlert'.$this->table))
+		{
+			$date = date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'));
+			$sql = 'SELECT fom.`id_flashsales_offer`, fom.`customer_email` FROM `' . _DB_PREFIX_ . 'flashsales_offer_mailalert` fom WHERE fom.`id_flashsales_offer` IN (SELECT fo.`id_flashsales_offer` FROM `' . _DB_PREFIX_ . 'flashsales_offer` fo WHERE fo.`date_start` = \'' . $date . '\')';
+			$results = Db::getInstance()->ExecuteS($sql);
+
+			if(count($results))
+			{
+				$titles = array(
+					0 => array(
+						'id_flashsales_offer' => 'ID Offer',
+						'customer_email'			=> 'email'
+					)
+				);
+				
+				$results = array_merge($titles, $results);
+				$this->_dirNameExportEmail	.= 'csv/';
+				$this->_fileNameExportEmail .= 'csv_' . $date . '.csv';
+				$file = $this->_dirNameExportEmail . $this->_fileNameExportEmail;
+
+				$exportCSV = new ExportToCSV($this->_fileNameExportEmail, $this->_dirNameExportEmail, ',', '"');
+
+				if(!$exportCSV->open())
+					$this->_errors[] = Tools::displayError('Error: cannot write.');
+
+				$exportCSV->setContent($results);
+
+				if($exportCSV->close() && !$this->_errors)
+				{
+					$sql = 'DELETE FROM `' . _DB_PREFIX_ . 'flashsales_offer_mailalert` WHERE `id_flashsales_offer_mailalert` IN (SELECT * FROM (SELECT fom.`id_flashsales_offer_mailalert` FROM `' . _DB_PREFIX_ . 'flashsales_offer_mailalert` fom WHERE fom.`id_flashsales_offer` IN (SELECT fo.`id_flashsales_offer` FROM `' . _DB_PREFIX_ . 'flashsales_offer` fo WHERE fo.`date_start` = \'' . $date . '\'))AS t)';
+					Db::getInstance()->Execute($sql);
+					LoaderTool::downloadContent($file, $this->_fileNameExportEmail, false, 'text/csv');
+					Tools::redirectAdmin($currentIndex.'&conf=4&token='.Tools::getAdminTokenLite('AdminFlashSalesContent').'&id_flashsales_category='. $flashsales_offer->id_flashsales_category);
+
+					return true; 
+				}
+				else
+					$this->_errors[] = Tools::displayError('Error: An error as occured').' '. $this->_fileNameExportEmail;
+			}
+			else
+				$this->_errors[] = Tools::displayError('Error: no email for these offers');
+		}
 		// POSITION
 		elseif (Tools::getValue('position'))
 		{
@@ -575,6 +644,11 @@ class AdminFlashSalesOffer extends AdminTab
 		}
 		else
 			parent::postProcess(true);
+	}
+
+	private function _weekToSeconds()
+	{
+		return 7 * 24 * 60 * 60;
 	}
 }
 ?>
