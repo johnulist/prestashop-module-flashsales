@@ -90,10 +90,18 @@ class FlashSalesOfferControllerCore extends FrontController
 
 	public function displayHeader()
 	{
-		self::$smarty->assign('flashsalesoffer_name', $this->flashsalesoffer->name);
-		self::$smarty->assign('flashsalesoffer_description', $this->flashsalesoffer->description);
-		self::$smarty->assign('flashsalesoffer_image', $this->flashsalesoffer->images[0]);
-		self::$smarty->assign('flashsalesoffer_price', $this->flashsalesoffer->prices['min_price']);
+		if (!Validate::isLoadedObject($this->flashsalesoffer) || $this->flashsalesoffer->date_start != date('Y-m-d', Configuration::get('FS_CURRENT_PERIOD')))
+		{
+			header('HTTP/1.1 404 Not Found');
+			header('Status: 404 Not Found');
+		}
+		else
+		{
+			self::$smarty->assign('flashsalesoffer_name', $this->flashsalesoffer->name);
+			self::$smarty->assign('flashsalesoffer_description', $this->flashsalesoffer->description);
+			self::$smarty->assign('flashsalesoffer_image', $this->flashsalesoffer->images[0]);
+			self::$smarty->assign('flashsalesoffer_price', $this->flashsalesoffer->prices['min_price']);
+		}
 		parent::displayHeader();
 	}
 	public function displayContent()

@@ -159,6 +159,7 @@ class FlashSalesOffer extends ObjectModel
 	{
 		$results = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` WHERE `id_flashsales_offer` = ' . $this->id);
 		$products = array();
+
 		foreach($results AS $result)
 		{
 			$product = new Product((int)$result['id_product'], true, $id_lang);
@@ -168,11 +169,16 @@ class FlashSalesOffer extends ObjectModel
 				$productImages[(int)$image['id_image']] = $image;
 
 			/* Attributes / Groups & colors */
-			$colors = array();
+			$tempProduct = array();
+			$tempProduct['product'] = $product;
+			$tempProduct['images'] = $productImages;
+			$tempProduct['cover'] = Product::getCover((int)$result['id_product']);
+
 			$attributesGroups = $product->getAttributesGroups((int)($id_lang));
 			if (is_array($attributesGroups) AND $attributesGroups)
 			{
 				$groups = array();
+				$colors = array();
 				$combinationImages = $product->getCombinationImages((int)($id_lang));
 				foreach ($attributesGroups AS $k => $row)
 				{
@@ -239,21 +245,13 @@ class FlashSalesOffer extends ObjectModel
 					$attributeList = rtrim($attributeList, ',');
 					$combinations[$id_product_attribute]['list'] = $attributeList;
 				}
-			}
-			$tempProduct = array();
-			$tempProduct['product'] = $product;
-			$tempProduct['images'] = $productImages;
-			$tempProduct['colors'] = (sizeof($colors) AND $product->id_color_default) ? $colors : false;
 
-			if(isset($groups))
+				$tempProduct['colors'] = (sizeof($colors) AND $product->id_color_default) ? $colors : false;
 				$tempProduct['groups'] = $groups;
-
-			if(isset($combinationImages))
 				$tempProduct['combinationImages'] = $combinationImages;
-
-			if(isset($combinations))
 				$tempProduct['combinations'] = $combinations;
-				
+			}
+
 			$products[] = $tempProduct;
 		}
 

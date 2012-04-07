@@ -35,10 +35,23 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 	<div id="container-product-display-product-page-view">
 		{foreach $flashsalesoffer->products key=key_product item=fproduct}
 		{assign var='product' value=$fproduct['product']}
+		{assign var='cover' value=$fproduct['cover']}
 		{assign var='images' value=$fproduct['images']}
-		{assign var='groups' value=$fproduct['groups']}
-		{assign var='combinations' value=$fproduct['combinations']}
-		{assign var='colors' value=$fproduct['colors']}
+		{if isset($fproduct['groups']) && $fproduct['groups']}
+			{assign var='groups' value=$fproduct['groups']}
+		{else}
+			{assign var='groups' value=null}
+		{/if}
+		{if isset($fproduct['combinations']) && $fproduct['combinations']}
+			{assign var='combinations' value=$fproduct['combinations']}
+		{else}
+			{assign var='combinations' value=null}
+		{/if}
+		{if isset($fproduct['colors']) && $fproduct['colors']}
+			{assign var='colors' value=$fproduct['colors']}
+		{else}
+			{assign var='colors' value=null}
+		{/if}
 		<div class="sub-product clearfix">
 		<script type="text/javascript">
 		// <![CDATA[
@@ -57,7 +70,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 		Prestashop.flashsales.frontend.combinations[{$product->id}] = new Array();
 		
 
-		{if isset($groups) && $groups}
+		{if isset($combinations) && $combinations}
 			// Combinations
 			{foreach from=$combinations key=idCombination item=combination}
 				Prestashop.flashsales.frontend.addCombination({$product->id|intval}, {$idCombination|intval}, new Array({$combination.list}), {$combination.quantity}, {$combination.price}, {$combination.ecotax}, {$combination.id_image}, '{$combination.reference|addslashes}', {$combination.unit_impact}, {$combination.minimal_quantity});
@@ -77,6 +90,8 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 				<h2>{$product->name|escape:'htmlall':'UTF-8'}</h2>
 				<h3>{$product->description|strip_tags}</h3>
 				<div class="thumbnail-sub-product">
+					{assign var=imageIds value="`$product->id`-`$cover.id_image`"}
+					<img src="{$link->getImageLink($product->link_rewrite, $imageIds, 'large')}" title="{$product->name|escape:'htmlall':'UTF-8'}" alt="{$product->name|escape:'htmlall':'UTF-8'}" id="bigpic" class="hidden" />
 					<ul>
 					{*if $flashsalesoffer->video && $flashsalesoffer->video_forward}
 					<li class="video"><a href="http://youtu.be/{$flashsalesoffer->video}" target="_blank"><i class="sprite video_ico">{l s='Vidéo du produit'}</i></a></li>
@@ -113,6 +128,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 					<input type="hidden" name="add" value="1" />
 					<input type="hidden" name="id_product_attribute" id="idCombination" value="" />
 				</p>
+				{if isset($groups) && $groups}
 				<div class="groups clearfix">
 					{foreach from=$groups key=id_attribute_group item=group}
 					{if $group.attributes|@count}
@@ -129,6 +145,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 					{/if}
 					{/foreach}
 				</div>
+				{/if}
 			</div>
 		
 			<div class="right-side">
@@ -179,5 +196,12 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 </div><!-- End#other-product -->
 {/if}
 {else}
-{include file="$tpl_dir./errors.tpl"}
+<div id="highlight">
+	{include file="$tpl_dir./breadcrumb-hightlight.tpl"}
+	<i class="sprite border-highlight"></i>
+	<h1 class="highlight-title-product" style="float: none">{l s='L\'offre n\'est pas disponible'}</h1>
+</div>
+<div id="product-highlight">
+	{include file="$tpl_dir./errors.tpl"}
+
 {/if}
