@@ -99,7 +99,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 						{foreach $images item=image}
 						{assign var=imageIds value="`$product->id`-`$image.id_image`"}
 						<li id="thumbnail_{$image.id_image}">
-							<a rel="group-picture-product_{$key_product}" href="{$link->getImageLink($product->link_rewrite, $imageIds, 'pictofferfancy')}" title="{$image.legend|htmlspecialchars}">
+							<a rel="group-picture-product-{$key_product}" class="fancybox" href="{$link->getImageLink($product->link_rewrite, $imageIds, 'pictofferfancy')}" title="{$image.legend|htmlspecialchars}">
 								<img id="thumb_{$image.id_image}" src="{$link->getImageLink($product->link_rewrite, $imageIds, 'pictofferthumbs')}" alt="{$image.legend|htmlspecialchars}">
 								<div class="picture-other-product-hover">
 									<i class="sprite take-a-look-product"></i>
