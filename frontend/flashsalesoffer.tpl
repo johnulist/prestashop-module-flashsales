@@ -173,7 +173,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 			{assign var='priceSplit' value=','|explode:$price}
 			{assign var='price_reduce' value={convertPrice price=$offer->prices['min_price_reduce']}}
 			<li>
-				<a href="" title="">
+				<a href="{$offer->offerLink}">
 					<div class="visuel-other-product"><img src="{$link->getImageLink('offer', $image, 'pictotheroffer')}" alt=""></div>
 					<div id="visuel-{$offer_key}" class="visuel-other-product-hover">
 						<div>
