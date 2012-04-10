@@ -43,11 +43,12 @@
 	{assign var='price' value={convertPrice price=$offer->prices['min_price']}}
 	{assign var='price_reduce' value={convertPrice price=$offer->prices['min_price_reduce']}}
 	{assign var='priceSplit' value=','|explode:$price}
-	{assign var='images' value=$offer->images}
+	{assign var='image' value=$offer->images[0]['imgIds']}
+	{assign var='product_link_rewrite' value=$offer->images[0]['product_link_rewrite']}
 	<div class="catalogue-product">
 		<div class="catalogue-left-side">
 			<div class="picture-catalogue">
-				<img src="{$link->getImageLink('offer', $images[0], 'pictoffer')}" class="pic-catalogue" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
+				<img src="{$link->getImageLink($product_link_rewrite, $image, 'pictotheroffer')}" class="pic-catalogue" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
 			</div>
 			<h2 class="catalogue-title-product">{$offer->name|escape:'htmlall':'UTF-8'}</h2>
 			<h3 class="catalogue-desc-product">{$offer->description|strip_tags}</h3>
