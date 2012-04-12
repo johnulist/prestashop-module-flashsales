@@ -152,7 +152,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 				<label for="qty">{l s='Quantité :'}</label>
 				<input type="text" name="qty" id="quantity_wanted" value="1">
 				<a href="" title="" class="sprite acheter"></a>
-				<a href="" title="" class="offer-to-friends"><i class="sprite cadeau"></i>{l s='Offrez-le à un ami'}</a>
+				<a href="" title="" class="offer-to-friends acheter"><i class="sprite cadeau"></i>{l s='Offrez-le à un ami'}</a>
 				<ul class="addthis_toolbox addthis_default_style share" addthis:ui_language="fr" addthis:url="{$flashsalesoffer->offerLink}" addthis:title="{l s='Découvrez l\'offre du jour sur #Only24h :'} {$flashsalesoffer->name|escape:'htmlall':'UTF-8'}" addthis:description="{$flashsalesoffer->description_short|escape:'htmlall':'UTF-8'}">
 					<li><a class="addthis_button_facebook at300b"></a></li>
 					<li><a class="addthis_button_twitter"><i class="sprite tw"></i></a></li>
