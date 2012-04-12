@@ -689,7 +689,7 @@ class FlashSales extends Module
 	{
 		global $smarty, $cookie;
 		$templateName = self::$cacheFiles[1] .'.tpl';
-		$target = date('Y-m-d H:i:s', (int)Configuration::get('FS_NEXT_PERIOD'));
+		$target = date('Y/m/d H:i:s', (int)Configuration::get('FS_NEXT_PERIOD'));
 
 		$smarty->assign('target', $target);
 		return $this->display(__FILE__, $templateName);
