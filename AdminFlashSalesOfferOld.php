@@ -32,7 +32,7 @@ class AdminFlashSalesOfferOld extends AdminTab
 
 		//$this->_select	 = '';
 		//$this->_join		 = '';
-		$this->_where = 'AND a.`date_end` <= CURRENT_DATE()';
+		$this->_where = 'AND a.`date_end` <= \''. date('Y-m-d', Configuration::get('FS_CURRENT_PERIOD')) . '\'';
 		//$this->_group		 = '';
 		//$this->_having	 = '';
 		//$this->_filter	 = '';
@@ -240,7 +240,7 @@ class AdminFlashSalesOfferOld extends AdminTab
 	public function display($token = NULL)
 	{
 		global $currentIndex, $cookie;
-		$this->getList((int)($cookie->id_lang), !$cookie->__get($this->table.'Orderby') ? 'position' : NULL, !$cookie->__get($this->table.'Orderway') ? 'ASC' : NULL);
+		$this->getList((int)($cookie->id_lang), !$cookie->__get($this->table.'Orderby') ? 'date_start' : NULL, !$cookie->__get($this->table.'Orderway') ? 'ASC' : NULL);
 		echo'<div style="margin:10px;">';
 		$this->displayList($token);
 		echo '</div>';

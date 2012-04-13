@@ -32,7 +32,7 @@ class AdminFlashSalesOfferOfTheDay extends AdminTab
 
 		//$this->_select	 = '';
 		//$this->_join		 = '';
-		$this->_where = 'AND a.`date_start` = CURRENT_DATE()';
+		$this->_where = 'AND a.`date_start` = \''. date('Y-m-d', Configuration::get('FS_CURRENT_PERIOD')) . '\'';
 		//$this->_group		 = '';
 		//$this->_having	 = '';
 		//$this->_filter	 = '';

@@ -37,11 +37,11 @@ class AdminFlashSalesOffer extends AdminTab
 		);
 
 		//$this->_select	 = '';
-		$this->_where		 = 'AND a.`date_start` > CURRENT_DATE()';
+		$this->_where		 = 'AND a.`date_start` >= \''. date('Y-m-d', Configuration::get('FS_NEXT_PERIOD')) . '\'';
 		//$this->_group		 = '';
 		//$this->_having	 = '';
 		//$this->_filter	 = '';
-		//$this->_orderBy	 = '';
+		//$this->_orderBy	 = 'a.`date_end`';
 		//$this->_orderWay = 'ASC';
 
 		parent::__construct();
@@ -323,7 +323,7 @@ class AdminFlashSalesOffer extends AdminTab
 		}
 		if (($id_flashsales_category = (int)Tools::getValue('id_flashsales_category')))
 			$currentIndex .= '&id_flashsales_category='.$id_flashsales_category;
-		$this->getList((int)($cookie->id_lang), !$cookie->__get($this->table.'Orderby') ? 'position' : NULL, !$cookie->__get($this->table.'Orderway') ? 'ASC' : NULL);
+		$this->getList((int)($cookie->id_lang), !$cookie->__get($this->table.'Orderby') ? 'date_start' : NULL, !$cookie->__get($this->table.'Orderway') ? 'ASC' : NULL);
 		//$this->getList((int)($cookie->id_lang));
 		if (!$id_flashsales_category)
 			$id_flashsales_category = 1;
@@ -373,7 +373,7 @@ class AdminFlashSalesOffer extends AdminTab
 				$this->_errors[] = Tools::displayError('You need to select the default picture of the offer');
 			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) != Configuration::get('FS_NB_PICTURES'))
 				$this->_errors[] = Tools::displayError('You have to select') . ' ' . Configuration::get('FS_NB_PICTURES') . ' ' . Tools::displayError('images');
-			elseif(strtotime(Tools::getValue('date_start')) < strtotime(date('Y-m-d')) + Configuration::get('FS_TIME_BETWEEN_PERIOD') && !isset($_POST['flashsales_old']))
+			elseif(strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD') < strtotime(date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'))) + Configuration::get('FS_TIME_BETWEEN_PERIOD') && !isset($_POST['flashsales_old']))
 				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');
 			elseif(FlashSalesOffer::getNumberOffersForTheDay(Tools::getValue('date_start')) >= Configuration::get('FS_NB_OFFERS') && !$id_flashsales_offer)
 				$this->_errors[] = Tools::displayError('You cannot add offer for this date, there are too much (max:') . ' ' . Configuration::get('FS_NB_OFFERS') . ')';
