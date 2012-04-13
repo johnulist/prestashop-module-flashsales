@@ -27,8 +27,8 @@ function onClickBuyButton(e) {
 	var quantity_wanted = $(this).prev().val();
 
 	// add the picture to the cart
-	$('#bigpic').show();
-	var $element = $('#bigpic');
+	$(this).parent().prev().find('.bigpic').show();
+	var $element = $(this).parent().prev().find('.bigpic');
 	var $picture = $element.clone();
 	var pictureOffsetOriginal = $element.offset();
 
@@ -37,7 +37,7 @@ function onClickBuyButton(e) {
 
 	var pictureOffset = $picture.offset();
 	var cartBlockOffset = $('#cart').offset();
-	$('#bigpic').hide();
+	$(this).parent().prev().find('.bigpic').hide();
 	// Check if the block cart is activated for the animation
 	if (cartBlockOffset != undefined && $picture.size())
 	{

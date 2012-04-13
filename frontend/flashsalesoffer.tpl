@@ -91,7 +91,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 				<h3>{$product->description|strip_tags}</h3>
 				<div class="thumbnail-sub-product">
 					{assign var=imageIds value="`$product->id`-`$cover.id_image`"}
-					<img src="{$link->getImageLink($product->link_rewrite, $imageIds, 'large')}" title="{$product->name|escape:'htmlall':'UTF-8'}" alt="{$product->name|escape:'htmlall':'UTF-8'}" id="bigpic" class="hidden" />
+					<img src="{$link->getImageLink($product->link_rewrite, $imageIds, 'large')}" title="{$product->name|escape:'htmlall':'UTF-8'}" alt="{$product->name|escape:'htmlall':'UTF-8'}" class="bigpic hidden" />
 					<ul>
 					{*if $flashsalesoffer->video && $flashsalesoffer->video_forward}
 					<li class="video"><a href="http://youtu.be/{$flashsalesoffer->video}" target="_blank"><i class="sprite video_ico">{l s='Vidéo du produit'}</i></a></li>
