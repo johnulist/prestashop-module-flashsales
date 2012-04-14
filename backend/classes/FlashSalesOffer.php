@@ -261,9 +261,15 @@ class FlashSalesOffer extends ObjectModel
 	public function getPricesOffer()
 	{
 		global $cookie;
-		$sql = 'SELECT MIN(p.`price`) AS `min_price`, products.`id_product`, p.`quantity`
+		/*$sql = 'SELECT MIN(p.`price`) AS `min_price`, products.`id_product`, p.`quantity`
 		FROM (SELECT `id_product` FROM `'._DB_PREFIX_.'flashsales_product` fp WHERE `id_flashsales_offer` = ' . $this->id . ') AS `products`
-		LEFT JOIN `'._DB_PREFIX_.'product` p ON (p.`id_product` = products.`id_product`)';
+		LEFT JOIN `'._DB_PREFIX_.'product` p ON (p.`id_product` = products.`id_product`)';*/
+		$sql = 'SELECT fp.`id_product`, p.`quantity`
+						FROM `' ._DB_PREFIX_. 'flashsales_product` fp
+						LEFT JOIN `'._DB_PREFIX_.'product` p ON (p.`id_product` = fp.`id_product`)
+						WHERE fp.`id_flashsales_offer` = '. $this->id .'
+						ORDER BY p.`price`
+						LIMIT 1';
 		$result = Db::getInstance()->ExecuteS($sql);
 
 		$id_shop = (int)(Shop::getCurrentShop());
