@@ -45,7 +45,7 @@
 	{assign var='priceSplit' value=','|explode:$price}
 	{assign var='image' value=$offer->images[0]['imgIds']}
 	{assign var='product_link_rewrite' value=$offer->images[0]['product_link_rewrite']}
-	<div class="catalogue-product">
+	<div class="catalogue-product clearfix">
 		<div class="catalogue-left-side">
 			<div class="picture-catalogue">
 				<img src="{$link->getImageLink($product_link_rewrite, $image, 'pictotheroffer')}" class="pic-catalogue" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
