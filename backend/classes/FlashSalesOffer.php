@@ -369,16 +369,15 @@ class FlashSalesOffer extends ObjectModel
 		foreach($all_products AS $fproduct)
 		{
 			$product = new Product($fproduct['id_product'], false, $id_lang);
-			$fimages = $product->getCombinationImages($id_lang);
+			$fimages = $product->getImages($id_lang);
 			if(!empty($fimages))
 			{
 				foreach($fimages AS $fimage)
 				{
 					$images[] = array(
 						'id_product' => $product->id,
-						'id_image'	 => $fimage[0]['id_image'],
-						'legend' => $fimage[0]['legend'],
-						'id_product_attribute' => $fimage[0]['id_product_attribute']
+						'id_image'	 => $fimage['id_image'],
+						'legend' => $fimage['legend']
 					);
 				}
 			}

@@ -14,7 +14,7 @@
 							</a>
 							{/foreach}
 							{if $offer->video && $offer->video_forward}
-							<a rel="group-picture-{$offer_key}" href="http://youtu.be/{$offer->video}" class="fancybox video_iframe">
+							<a href="http://youtu.be/{$offer->video}" class="video_iframe">
 								<iframe width="{$pictofferSize.width}" height="{$pictofferSize.height}" src="http://www.youtube.com/embed/{$offer->video}?showinfo=0&theme=light&wmode=opaque" frameborder="0" allowfullscreen></iframe>
 							</a>
 							{/if}

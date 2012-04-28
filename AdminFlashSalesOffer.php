@@ -225,7 +225,7 @@ class AdminFlashSalesOffer extends AdminTab
 							{
 								$imageObj = new Image($image['id_image']);
 								echo '<li class="flashsales_offer_image" id="flashsales_offer_image_' . $image['id_product'] . '">';
-								echo cacheImage(_PS_IMG_DIR_.'p/'.$imageObj->getExistingImgPath().'.jpg', 'product_mini_flashsales_'.(int)($image['id_product']).(isset($image['id_product_attribute']) ? '_'.(int)($image['id_product_attribute']) : '').'.jpg', 80, 'jpg');
+								echo cacheImage(_PS_IMG_DIR_.'p/'.$imageObj->getExistingImgPath().'.jpg', 'product_mini_flashsales_'.(int)($image['id_image']).'.jpg', 80, 'jpg');
 								echo '<input type="checkbox" class="checkbox_offer_image" name="flashsales_offer_image[]" value="' . (int)($image['id_product']) . '-' . (int)($image['id_image']) . '" '. (isset($image['checked']) && $image['checked'] ? 'checked="checked"' : '') .' />';
 								echo '</li>';
 							}
