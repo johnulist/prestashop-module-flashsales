@@ -14,6 +14,7 @@ Prestashop.flashsales.frontend.selectedCombination = new Array();
 $(document).ready(function() {
   $('#flashsalesoffer a.acheter').click(onClickBuyButton);
 	$('.groups select').change(Prestashop.flashsales.frontend.findCombination);
+	$('.groups select').change();
 });
 
 // -----------------------------
@@ -68,7 +69,6 @@ Prestashop.flashsales.frontend.addCombination = function(idProduct, idCombinatio
 	combination['unit_price'] = unit_price;
 	combination['minimal_quantity'] = minimal_quantity;
 	Prestashop.flashsales.frontend.combinations[idProduct].push(combination);
-
 }
 
 Prestashop.flashsales.frontend.findCombination = function()
@@ -104,6 +104,19 @@ Prestashop.flashsales.frontend.findCombination = function()
 
 			//get the data of product with these attributes
 			quantityAvailable = Prestashop.flashsales.frontend.combinations[idProduct][combination]['quantity'];
+
+			if(quantityAvailable <= 0) {
+				var tmp = $('#idCombination').parent().parent().next().children('#quantity_wanted').next('a.sprite').removeClass('acheter').addClass('deal_end');
+				tmp.unbind('click').click(function(e) {
+					e.preventDefault();
+				});
+				tmp.css('cursor', 'default');
+			}
+			else {
+				$('#idCombination').parent().parent().next().children('#quantity_wanted').next('a.sprite').removeClass('deal_end').addClass('acheter');
+				$('#flashsalesoffer a.acheter').click(onClickBuyButton).css('cursor', 'pointer');
+			}
+			
 			Prestashop.flashsales.frontend.selectedCombination['price'] = Prestashop.flashsales.frontend.combinations[idProduct][combination]['price'];
 
 			Prestashop.flashsales.frontend.selectedCombination['unit_price'] = Prestashop.flashsales.frontend.combinations[idProduct][combination]['unit_price'];

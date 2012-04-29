@@ -94,7 +94,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 					<img src="{$link->getImageLink($product->link_rewrite, $imageIds, 'large')}" title="{$product->name|escape:'htmlall':'UTF-8'}" alt="{$product->name|escape:'htmlall':'UTF-8'}" class="bigpic hidden" />
 					<ul>
 					{*if $flashsalesoffer->video && $flashsalesoffer->video_forward}
-					<li class="video"><a href="http://youtu.be/{$flashsalesoffer->video}" target="_blank"><i class="sprite video_ico">{l s='Vidéo du produit'}</i></a></li>
+						<li class="video"><a href="http://youtu.be/{$flashsalesoffer->video}" target="_blank"><i class="sprite video_ico">{l s='Vidéo du produit'}</i></a></li>
 					{/if*}
 						{foreach $images item=image}
 						{assign var=imageIds value="`$product->id`-`$image.id_image`"}
@@ -151,7 +151,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 			<div class="right-side">
 				<label for="qty">{l s='Quantité :'}</label>
 				<input type="text" name="qty" id="quantity_wanted" value="1">
-				<a href="" title="" class="sprite acheter"></a>
+				<a href="" title="" class="sprite {if $product->quantity > 0}acheter{else}deal_end{/if}"></a>
 				<a href="" title="" class="offer-to-friends acheter"><i class="sprite cadeau"></i>{l s='Offrez-le à un ami'}</a>
 				<ul class="addthis_toolbox addthis_default_style share" addthis:ui_language="fr" addthis:url="{$flashsalesoffer->offerLink}" addthis:title="{l s='Découvrez l\'offre du jour sur #Only24h :'} {$flashsalesoffer->name|escape:'htmlall':'UTF-8'}" addthis:description="{$flashsalesoffer->description_short|escape:'htmlall':'UTF-8'}">
 					<li><a class="addthis_button_facebook at300b"></a></li>
