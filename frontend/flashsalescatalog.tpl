@@ -1,8 +1,8 @@
 <div id="highlight">
 	{include file="$tpl_dir./breadcrumb-hightlight.tpl"}
 	<i class="sprite border-highlight"></i>
-	<span class="highlight-title-product">{l s='Le catalogue'}</span>
-	<h1 class="clearfix">{l s='Retrouvez ici l\'ensemble de nos offres'}</h1>
+	<span class="highlight-title-product">{l s='Retrouvez nos ventes flash récentes'}</span>
+	
 	<script>
 		$(function(){
 			$('#category').bind('change', function () {
@@ -21,13 +21,13 @@
 			<option value="{$category.id_flashsales_category}" {if $current_category eq $category.id_flashsales_category}selected="selected"{/if}>{$category.name}</option>
 			{/foreach}
 		</select>
-		<form action="{$link->getPageLink('flashsalescatalog.php', true)}" method="post">
+		<form action="{$link->getPageLink('flashsalescatalog.php', true)}" method="post" class="form_search_flashsalescatalog">
 			<input type="text" name="search_text" placeholder="{l s='Recherche...'}" value="{if isset($smarty.post.search_text)}{$smarty.post.search_text|htmlentities:$ENT_QUOTES:'utf-8'|stripslashes}{/if}">
 			{if isset($smarty.get.old)}
 			<input type="hidden" name="old" value="1">
 			{/if}
 			<input type="hidden" name="category" value="{$current_category}">
-			<input type="submit" name="SubmitOfferSearch" class="sprite send">
+			<input type="submit" name="SubmitOfferSearch" class="sprite send" value="">
 		</form>
 	</div>
 </div>
