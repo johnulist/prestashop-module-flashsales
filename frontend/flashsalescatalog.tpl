@@ -80,3 +80,4 @@
 	</div><!-- End#catalogue-product -->
 	{/foreach}
 </div>
+{include file="$tpl_dir./pagination-flashsalescatalog.tpl"}

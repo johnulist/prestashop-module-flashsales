@@ -75,7 +75,6 @@ class FlashSalesCatalogControllerCore extends FrontController
 		// Search
 		if (Tools::isSubmit('SubmitOfferSearch'))
 		{
-
 			$search_text = Tools::getValue('search_text');
 			$expr = Search::sanitize($search_text, (int)self::$cookie->id_lang);
 			$sql = 'SELECT DISTINCT(fo.`id_flashsales_offer`)
@@ -98,11 +97,21 @@ class FlashSalesCatalogControllerCore extends FrontController
 			self::$smarty->assign('offers', $offers);
 		}
 		elseif($oldOffers)
-			$offers = self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category));
+		{
+			$offers = FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category);
+			$this->pagination(count($offers));
+			$offers = FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category, false, $this->p, $this->n);
+			self::$smarty->assign('offers', $offers);
+		}
 		else
-			$offers = self::$smarty->assign('offers', FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category, true));
+		{
+			$offers = FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category, true);
+			$this->pagination(count($offers));
+			$offers = FlashSalesOffer::getOffersBeforeTheDay(date('Y-m-d'), (int)(self::$cookie->id_lang), $id_category, true, $this->p, $this->n);
+			self::$smarty->assign('offers', $offers);
+		}
 
-		$this->pagination(count($offers));
+		//$this->pagination(count($offers));
 	}
 
 	public function setMedia()
@@ -148,16 +157,17 @@ class FlashSalesCatalogControllerCore extends FrontController
 		if ($this->p > ($nbOffers / $this->n))
 			$this->p = ceil($nbOffers / $this->n);
 		$pages_nb = ceil($nbOffers / (int)($this->n));
-
+		//die((string)$nbOffers);
 		$start = (int)($this->p - $range);
 		if ($start < 1)
 			$start = 1;
 		$stop = (int)($this->p + $range);
 		if ($stop > $pages_nb)
 			$stop = (int)($pages_nb);
-		self::$smarty->assign('nb_offers', $nbOffers);
+		self::$smarty->assign('nb_products', $nbOffers);
 		$pagination_infos = array(
 			'offers_per_page' => $offersPerPage,
+			'products_per_page' => $offersPerPage,
 			'pages_nb' => $pages_nb,
 			'p' => $this->p,
 			'n' => $this->n,
