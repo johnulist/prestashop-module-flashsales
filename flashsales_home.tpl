@@ -51,17 +51,17 @@
 								{/if}
 								<div id="more_info_sheets">
 									<div class="tabpage" id="tabpage_1">
-										<p>{$offer->description}</p>
+										<p>{$offer->description|escape:'htmlall':'UTF-8'|nl2br}</p>
 									</div>
 									<div class="tabpage" id="tabpage_2">
-								<p>{$offer->composition}</p>
+								<p>{$offer->composition|escape:'htmlall':'UTF-8'|nl2br}</p>
 									</div>
 								</div>
 						</div><!-- END#tabContainer -->
 					</div><!-- End#left-side -->
 					<div id="right-side">
 						<h2>{$offer->name|escape:'htmlall':'UTF-8'}</h2>
-						<h3>{$offer->description_short}</h3>
+						<h3>{$offer->description_short|escape:'htmlall':'UTF-8'|nl2br}</h3>
 						<p>{l s='à partir de'}</p>
 						<div class="price-container clearfix">
 							{assign var='price' value={convertPrice price=$offer->prices['min_price']}}

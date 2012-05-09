@@ -51,7 +51,7 @@
 				<img src="{$link->getImageLink($product_link_rewrite, $image, 'pictotheroffer')}" class="pic-catalogue" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
 			</div>
 			<h2 class="catalogue-title-product">{$offer->name|escape:'htmlall':'UTF-8'}</h2>
-			<h3 class="catalogue-desc-product">{$offer->description|strip_tags}</h3>
+			<h3 class="catalogue-desc-product">{$offer->description|escape:'html':'UTF-8'|nl2br}</h3>
 			{if $offer->nbProductsAlreadyBuy > 0}
 			<p class="catalogue-sell-product">{$offer->nbProductsAlreadyBuy} {l s='produits achetés !'}</p>
 			{/if}
