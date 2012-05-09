@@ -565,6 +565,13 @@ class FlashSales extends Module
 		switch($action)
 		{
 			case 1:
+				$carts = Cart::getNonOrderedCarts(date('Y-m-d', (int)($this->_abbreviation . '_CURRENT_PERIOD')), date('Y-m-d', (int)(Configuration::get($this->_abbreviation . '_NEXT_PERIOD'))));
+				foreach($carts AS $cart)
+				{
+					$cartO = new Cart($cart['id_cart']);
+					$cartO->delete();
+				}
+
 				// Update next period
 				// SET CRON TASK TO CHANGE NEXT PERIOD (h-1 CURRENT PERIOD)
 				Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
