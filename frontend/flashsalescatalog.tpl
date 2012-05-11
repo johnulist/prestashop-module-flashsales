@@ -48,7 +48,7 @@
 	<div class="catalogue-product clearfix">
 		<div class="catalogue-left-side">
 			<div class="picture-catalogue">
-				<img src="{$link->getImageLink($product_link_rewrite, $image, 'pictotheroffer')}" class="pic-catalogue" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
+				<img src="{$link->getImageLink($product_link_rewrite, $image, 'pictocatalog')}" class="pic-catalogue" width="140" height="140">
 			</div>
 			<h2 class="catalogue-title-product">{$offer->name|escape:'htmlall':'UTF-8'}</h2>
 			<h3 class="catalogue-desc-product">{$offer->description|escape:'html':'UTF-8'|nl2br}</h3>
