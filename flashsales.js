@@ -12,7 +12,7 @@ Prestashop.flashsales.frontend.globalQuantity = new Number;
 Prestashop.flashsales.frontend.selectedCombination = new Array();
 
 $(document).ready(function() {
-  $('#flashsalesoffer a.acheter').click(onClickBuyButton);
+  $('#flashsalesoffer a.acheter').unbind('click').click(onClickBuyButton);
 	$('.groups select').change(Prestashop.flashsales.frontend.findCombination);
 	$('.groups select').change();
 });
@@ -22,7 +22,7 @@ $(document).ready(function() {
 // -----------------------------
 function onClickBuyButton(e) {
 	e.preventDefault();
-
+	var element = $(this);
 	var id_product = $(this).parent().prev().find('.hidden #product_id').val();
 	var id_combination = $(this).parent().prev().find('.hidden #idCombination').val();
 	var quantity_wanted = $(this).prev().val();
@@ -40,13 +40,16 @@ function onClickBuyButton(e) {
 	var cartBlockOffset = $('#cart').offset();
 	$(this).parent().prev().find('.bigpic').hide();
 	// Check if the block cart is activated for the animation
-	if (cartBlockOffset != undefined && $picture.size())
+	if (cartBlockOffset != undefined && $picture.size() && !$(this).hasClass('clickedTest'))
 	{
+		$(this).addClass('clickedTest');
 		$picture.appendTo('body');
 		$picture.css({ 'position': 'absolute', 'top': $picture.css('top'), 'left': $picture.css('left') })
 		.animate({ 'width': $element.attr('width')*0.66, 'height': $element.attr('height')*0.66, 'opacity': 0.2, 'top': cartBlockOffset.top + 30, 'left': cartBlockOffset.left + 15 }, 1000)
 		.fadeOut(100, function() {
 			ajaxCart.add(id_product, id_combination, true, null, quantity_wanted, null);
+			element.removeClass('clickedTest');
+			console.log(id_product + ' ' + id_combination + ' ' + quantity_wanted);
 		});
 	}
 
