@@ -646,27 +646,31 @@ class FlashSalesOffer extends ObjectModel
 
 	public static function getOfferLink($flashsales_offer)
 	{
-		global $cookie, $link;
+		global $cookie;
 		$allow = (int)Configuration::get('PS_REWRITING_SETTINGS');
 		if (is_object($flashsales_offer))
 		{
-			$link = '';
+			$link = new Link();
+			$linkReturn = '';
 			if ($allow == 1)
 			{
-				$link .= (_PS_BASE_URL_.__PS_BASE_URI__.$link->getLangLink((int)$id_lang));
+				$id_lang = (int)$cookie->id_lang;
+				$lang_link = Language::getIsoById((int)$id_lang).'/';
+				$linkReturn .= (_PS_BASE_URL_.__PS_BASE_URI__.$lang_link);
 
-				$link .= (int)$flashsales_offer->id.'-';
+				$linkReturn .= (int)$flashsales_offer->id.'-';
+
 				if (is_array($flashsales_offer->link_rewrite))
-					$link.= $flashsales_offer->link_rewrite[(int)$cookie->id_lang];
+					$linkReturn.= $flashsales_offer->link_rewrite[(int)$cookie->id_lang];
 				else 
-				 	$link.= $flashsales_offer->link_rewrite;
+					$linkReturn.= $flashsales_offer->link_rewrite;
 
-				$link .= '.html';
+				$linkReturn .= '.html';
 			}
 			else
-				$link .= (_PS_BASE_URL_.__PS_BASE_URI__.'flashsalesoffer.php?id_flashsales_offer='.(int)$flashsales_offer->id);
+				$linkReturn .= (_PS_BASE_URL_.__PS_BASE_URI__.'flashsalesoffer.php?id_flashsales_offer='.(int)$flashsales_offer->id);
 
-			return $link;
+			return $linkReturn;
 		}
 		else
 			return _PS_BASE_URL_.__PS_BASE_URI__.'flashsalesoffer.php?id_flashsales_offer='.(int)$flashsales_offer;
