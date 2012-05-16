@@ -358,6 +358,14 @@ class FlashSales extends Module
 				'help'		=> $this->l('provide a number of pictures by offer to display')
 			),
 			2 => array(
+				'config_name' => $this->_abbreviation . '_NB_PICTURES_REQUIRED',
+				'name' => strtolower($this->name) . '_nb_pictures_required',
+				'type'	=> 'boolean',
+				'validate' => 'isBool',
+				'title'		=> $this->l('Force the number of pictures by offer to display'),
+				'default' => 0
+			),
+			3 => array(
 				'config_name'		=> $this->_abbreviation . '_USE_VIDEO',
 				'name'			=> strtolower($this->name) . '_use_video',
 				'title'		=> $this->l('Use video'),
@@ -366,7 +374,7 @@ class FlashSales extends Module
 				'default' => 1,
 				'help'		=> $this->l('do you want to display video for an offer ?')
 			),
-			3 => array(
+			4 => array(
 				'config_name'		=> $this->_abbreviation . '_TIME_BETWEEN_PERIOD',
 				'name'			=> strtolower($this->name) . '_time_between_period',
 				'title'		=> $this->l('Day(s) between each sales period'),
@@ -392,7 +400,7 @@ class FlashSales extends Module
 				'validate' => 'isUnsignedId',
 				'default' => self::_daysToSeconds(1)
 			),
-			4 => array(
+			5 => array(
 				'config_name'		=> $this->_abbreviation . '_TIME_START_DAY',
 				'name'			=> strtolower($this->name) . '_time_start_day',
 				'title'		=> $this->l('Time start each day'),
@@ -401,25 +409,25 @@ class FlashSales extends Module
 				'default' => 36000,
 				'help'		=> $this->l('set time start')
 			),
-			5 => array(
+			6 => array(
 				'config_name'		=> $this->_abbreviation . '_NEXT_PERIOD',
 				'name'			=> strtolower($this->name) . '_next_period',
 				'type'		=> false, // boolean, text, radio, select, checkbox or false
 				'default' => strtotime('midnight') + self::_daysToSeconds(1) + 36000
 			),
-			6 => array(
+			7 => array(
 				'config_name' => $this->_abbreviation . '_SECURE_KEY',
 				'name' => strtolower($this->name) . '_secure_key',
 				'type'	=> false,
 				'default' => strtoupper(Tools::passwdGen(16))
 			),
-			7 => array(
+			8 => array(
 				'config_name' => $this->_abbreviation . '_CACHE_ID',
 				'name' => strtolower($this->name) . '_cache_id',
 				'type'	=> false,
 				'default' => strtoupper(Tools::passwdGen(10))
 			),
-			8 => array(
+			9 => array(
 				'config_name' => $this->_abbreviation . '_OFFERS_PER_PAGE',
 				'name' => strtolower($this->name) . '_offers_per_page',
 				'type'	=> 'text',

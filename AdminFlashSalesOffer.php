@@ -217,7 +217,7 @@ class AdminFlashSalesOffer extends AdminTab
 		// OFFER IMAGES
 		echo '<fieldset style="font-size: 1em">
 						<legend><img src="../img/admin/picture.gif">'. $this->l('Offer images') .'</legend>
-						<p>'. $this->l('Select') . ' ' . Configuration::get('FS_NB_PICTURES', 3) . ' ' . $this->l('images you want to display in your offer.').'</p>
+						<p>'. $this->l('Select') . ' ' . (Configuration::get('FS_NB_PICTURES') == 0 ? $this->l('all') : Configuration::get('FS_NB_PICTURES')) . ' ' . $this->l('images you want to display in your offer.').'</p>
 						<ul id="offer_images_container">';
 						if($all_images)
 						{
@@ -371,7 +371,7 @@ class AdminFlashSalesOffer extends AdminTab
 
 			if(!isset($_POST['flashsales_offer_image']) || empty($_POST['flashsales_offer_image']))
 				$this->_errors[] = Tools::displayError('You need to select the default picture of the offer');
-			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) != Configuration::get('FS_NB_PICTURES'))
+			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) != Configuration::get('FS_NB_PICTURES') && Configuration::get('FS_NB_PICTURES') != 0)
 				$this->_errors[] = Tools::displayError('You have to select') . ' ' . Configuration::get('FS_NB_PICTURES') . ' ' . Tools::displayError('images');
 			elseif(strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD') < strtotime(date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'))) + Configuration::get('FS_TIME_BETWEEN_PERIOD') && !isset($_POST['flashsales_old']))
 				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');
@@ -411,7 +411,7 @@ class AdminFlashSalesOffer extends AdminTab
 						$images = '';
 						foreach($flashsales_offer_images AS $k => $id_image)
 						{
-							if($k <= Configuration::get('FS_NB_PICTURES') - 1)
+							if($k <= Configuration::get('FS_NB_PICTURES') - 1 || Configuration::get('FS_NB_PICTURES') == 0)
 							{
 								// Prepare query
 								$images .= "('" . $flashsales_offer->id . "', '" . $id_image . "', '" . $k . "', NOW(), NOW())";
@@ -457,7 +457,7 @@ class AdminFlashSalesOffer extends AdminTab
 						$images = '';
 						foreach($flashsales_offer_images AS $k => $id_image)
 						{
-							if($k <= Configuration::get('FS_NB_PICTURES') - 1)
+							if($k <= Configuration::get('FS_NB_PICTURES') - 1 || Configuration::get('FS_NB_PICTURES') == 0)
 							{
 								// Prepare query
 								$images .= "('" . $flashsales_offer->id . "', '" . $id_image . "', '" . $k . "', NOW(), NOW())";

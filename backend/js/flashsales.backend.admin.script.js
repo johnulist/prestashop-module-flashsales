@@ -66,7 +66,7 @@ function onCheckChekme(e) {
 
 function onCheckFlashSalesImageBox(e) {
 	var elementsCheckedLength = $('input.checkbox_offer_image:checked').length;
-	if(elementsCheckedLength > Prestashop.flashsales.backend.nb_images) {
+	if(elementsCheckedLength > Prestashop.flashsales.backend.nb_images  && Prestashop.flashsales.backend.nb_images != 0) {
 		e.preventDefault();
 		alert(Prestashop.flashsales.backend.too_much_images);
 	}
@@ -74,7 +74,7 @@ function onCheckFlashSalesImageBox(e) {
 
 function onClickSubmitAddFlashsaleOffer(e) {
 	var elementsCheckedLength = $('input.checkbox_offer_image:checked').length;
-	if(elementsCheckedLength != Prestashop.flashsales.backend.nb_images) {
+	if(elementsCheckedLength != Prestashop.flashsales.backend.nb_images && Prestashop.flashsales.backend.nb_images != 0) {
 		e.preventDefault();
 		alert(Prestashop.flashsales.backend.too_less_images);
 	}
