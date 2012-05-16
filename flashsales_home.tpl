@@ -14,12 +14,12 @@
 							</a>
 							{/if}
 							{foreach $offer->images key=image_key item=image}
-							<a rel="group-picture-{$offer_key}" href="{$link->getImageLink($image.product_link_rewrite, $image.imgIds, 'pictofferfancy')}" class="fancybox">
+							<a rel="group-picture-{$offer_key}" href="{$link->getImageLink($image.product_link_rewrite, $image.imgIds, 'pictofferfancy')}" class="fancybox to_defile">
 								<img src="{$link->getImageLink($image.product_link_rewrite, $image.imgIds, 'pictoffer')}" alt="" class="pict-product-one pict_product_{$image_key}" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
 							</a>
 							{/foreach}
 							{if $offer->video && !$offer->video_forward}
-							<a href="http://youtu.be/{$offer->video}" class="video_iframe">
+							<a href="http://youtu.be/{$offer->video}" class="video_iframe to_defile">
 								<iframe width="{$pictofferSize.width}" height="{$pictofferSize.height}" src="http://www.youtube.com/embed/{$offer->video}?showinfo=0&theme=light&wmode=opaque" frameborder="0" allowfullscreen></iframe>
 							</a>
 							{/if}
