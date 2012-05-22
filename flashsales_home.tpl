@@ -7,27 +7,41 @@
 				{foreach $module.offers key=offer_key item=offer}
 				<div class="product-display first-product">
 					<div id="left-side">
+						{if $offer->video}
+						{literal}
+						<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>		
+						<script type="text/javascript">
+							var params = { allowScriptAccess: "always" };
+							var atts = { id: "ytapiplayer" };
+							swfobject.embedSWF("http://www.youtube.com/v/{/literal}{$offer->video}{literal}?enablejsapi=1&playerapiid=ytapiplayer&version=3&showinfo=0&theme=light&wmode=opaque&fs=1", "ytapiplayer", "{/literal}{$pictofferSize.width}{literal}", "{/literal}{$pictofferSize.height}{literal}", "8", null, null, params, atts);
+							</script>
+						{/literal}
+						{/if}
 						<div class="picture">
 							{if $offer->video && $offer->video_forward}
-							<a href="http://youtu.be/{$offer->video}" class="video_iframe">
-								<iframe width="{$pictofferSize.width}" height="{$pictofferSize.height}" src="http://www.youtube.com/embed/{$offer->video}?showinfo=0&theme=light&wmode=opaque" frameborder="0" allowfullscreen></iframe>
+							<a href="http://youtu.be/{$offer->video}" class="video_iframe to_defile">
+								<div id="ytapiplayer">
+									{l s='Vous avez besoin de Flash Player 8+ et JavaScript activé pour voir cette vidéo.'}
+								</div>
 							</a>
 							{/if}
-							{foreach $offer->images key=image_key item=image}
-							<a rel="group-picture-{$offer_key}" href="{$link->getImageLink($image.product_link_rewrite, $image.imgIds, 'pictofferfancy')}" class="fancybox to_defile">
+							{foreach $offer->images key=image_key item=image name=images}
+							<a rel="group-picture-{$offer_key}" href="{$link->getImageLink($image.product_link_rewrite, $image.imgIds, 'pictofferfancy')}" class="fancybox to_defile" style="display:{if $smarty.foreach.images.index == 1}block{else}none{/if}">
 								<img src="{$link->getImageLink($image.product_link_rewrite, $image.imgIds, 'pictoffer')}" alt="" class="pict-product-one pict_product_{$image_key}" width="{$pictofferSize.width}" height="{$pictofferSize.height}">
 							</a>
 							{/foreach}
 							{if $offer->video && !$offer->video_forward}
 							<a href="http://youtu.be/{$offer->video}" class="video_iframe to_defile">
-								<iframe width="{$pictofferSize.width}" height="{$pictofferSize.height}" src="http://www.youtube.com/embed/{$offer->video}?showinfo=0&theme=light&wmode=opaque" frameborder="0" allowfullscreen></iframe>
+								<div id="ytapiplayer">
+									{l s='Vous avez besoin de Flash Player 8+ et JavaScript activé pour voir cette vidéo.'}
+								</div>
 							</a>
 							{/if}
 							<i class="sprite loupe" {if $offer->video}style="display: none"{/if}></i>
 							<div class="other-view">
 								<ul>
 									{foreach $offer->images key=image_key_tbs item=image}
-									<li class="tbs_{$image_key_tbs}"><a href="#"><img src="{$link->getImageLink('offer', $image.imgIds, 'pictofferthumbs')}" alt=""></a></li>
+									<li class="tbs_{$image_key_tbs}"><a href="#"><img src="{$link->getImageLink('offer', $image.imgIds, 'pictofferthumbs')}" alt="" width="{$pictofferthumbsSize.width}" height="{$pictofferthumbsSize.height}"></a></li>
 									{/foreach}
 									{if $offer->video}
 									<li class="video_iframe_thumb">
@@ -115,7 +129,7 @@
 			{assign var='price_reduce' value={convertPrice price=$offer->prices['min_price_reduce']}}
 			<li {if $offer_key eq 0}style="display: none"{/if}>
 				<a href="" title="">
-					<div class="visuel-other-product"><img src="{$link->getImageLink($product_link_rewrite, $image, 'pictotheroffer')}" alt=""></div>
+					<div class="visuel-other-product"><img src="{$link->getImageLink($product_link_rewrite, $image, 'pictotheroffer')}" alt="" width="{$pictotherofferSize.width}" height="{$pictotherofferSize.height}"></div>
 					<div id="visuel-{$offer_key}" class="visuel-other-product-hover">
 						<div>
 							<i class="sprite take-a-look"></i>
