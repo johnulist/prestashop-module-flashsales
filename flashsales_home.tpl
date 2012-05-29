@@ -19,7 +19,7 @@
 						{/if}
 						<div class="picture">
 							{if $offer->video && $offer->video_forward}
-							<a href="http://youtu.be/{$offer->video}" class="video_iframe to_defile">
+							<a href="#" class="video_iframe to_defile">
 								<div id="ytapiplayer">
 									{l s='Vous avez besoin de Flash Player 8+ et JavaScript activé pour voir cette vidéo.'}
 								</div>
@@ -31,7 +31,7 @@
 							</a>
 							{/foreach}
 							{if $offer->video && !$offer->video_forward}
-							<a href="http://youtu.be/{$offer->video}" class="video_iframe to_defile">
+							<a href="#" class="video_iframe to_defile">
 								<div id="ytapiplayer">
 									{l s='Vous avez besoin de Flash Player 8+ et JavaScript activé pour voir cette vidéo.'}
 								</div>
