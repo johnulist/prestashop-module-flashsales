@@ -128,9 +128,9 @@
 			{assign var='priceSplit' value=','|explode:$price}
 			{assign var='price_reduce' value={convertPrice price=$offer->prices['min_price_reduce']}}
 			<li {if $offer_key eq 0}style="display: none"{/if}>
-				<a href="" title="">
+				<a href="#" id="visuel-{$offer_key}">
 					<div class="visuel-other-product"><img src="{$link->getImageLink($product_link_rewrite, $image, 'pictotheroffer')}" alt="" width="{$pictotherofferSize.width}" height="{$pictotherofferSize.height}"></div>
-					<div id="visuel-{$offer_key}" class="visuel-other-product-hover">
+					<div class="visuel-other-product-hover">
 						<div>
 							<i class="sprite take-a-look"></i>
 							<p>{l s='Voir l\'offre'}</p>
