@@ -185,8 +185,10 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 					<div>
 						<p class="product-name">{$offer->name|escape:'htmlall':'UTF-8'}</p>
 						{if $offer->prices['reduction'] neq 0}
+						<div>
 						<span class="original-price">{$price_reduce}</span>
 						<span class="remise">-{$offer->prices['reduction'].reduction*100}% !</span>
+						</div>
 						{/if}
 						<p class="price-fix-ie">{$priceSplit[0]}<span class="cts-minimify">,{$priceSplit[1]}</span></p>
 					</div>
