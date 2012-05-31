@@ -622,12 +622,14 @@ class FlashSales extends Module
 						}
 					}
 				}
+				Configuration::updateValue($this->_abbreviation . '_CURRENT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
+				$this->_emptyCache(false);
 				break;
 			case 2:
 				// CLEAR CACHE
 				// SET CRON TASK TO CHANGE PERIOD (10h by default)
-				Configuration::updateValue($this->_abbreviation . '_CURRENT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
-				$this->_emptyCache(false);
+				//Configuration::updateValue($this->_abbreviation . '_CURRENT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
+				//$this->_emptyCache(false);
 				break;
 			case 3:
 				// CLEAR ALL CACHE

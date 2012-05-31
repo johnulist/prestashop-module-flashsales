@@ -164,9 +164,9 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 	</div><!-- End#product-highlight -->
 </div>
 {if $flashsalesoffer_others|@count gt 1}
-<div id="other-product">
-	<p class="other_offer_title">{l s='Les autres offres'}</p>
-	<ul class="clearfix">
+<div id="other-product" class="clearfix">
+	<p class="other-product-title">{l s='Les autres offres'}</p>
+	<ul>
 		{foreach $flashsalesoffer_others key=offer_key item=offer}
 			{assign var='image' value=$offer->images[0]['imgIds']}
 			{assign var='product_link_rewrite' value=$offer->images[0]['product_link_rewrite']}
