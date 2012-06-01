@@ -23,10 +23,10 @@ class FlashSales extends Module
 		$this->displayName = $this->l('Flash sales');
 		$this->description = $this->l('Manage flash sales');
 
-		$this->_tplFile				 = _PS_MODULE_DIR_ . $this->name . '/backend/tpl/' . $this->name . '.backend.configure.tpl';
-		$this->_adminClassName = 'AdminFlashSalesContent';
+		$this->_tplFile         = _PS_MODULE_DIR_ . $this->name . '/backend/tpl/' . $this->name . '.backend.configure.tpl';
+		$this->_adminClassName  = 'AdminFlashSalesContent';
 		$this->_idTabParent		= Tab::getIdFromClassName('AdminCatalog');
-		$this->_adminTabName	 = array(
+		$this->_adminTabName	= array(
 			1 => 'Flash sales',
 			2 => 'Ventes flash',
 			3 => 'Flash sales',
@@ -561,7 +561,7 @@ class FlashSales extends Module
 			// Special
 			$time = strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD') + Configuration::get($this->_abbreviation . '_TIME_START_DAY');
 			Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', $time);
-			$this->_emptyCache(false);
+			//$this->_emptyCache(false);
 			$output .= '<div class="conf confirm"><img src="../img/admin/ok.gif" alt="'.$this->l('Confirmation').'" />'.$this->l('Settings updated').'</div>';
 		}
 
@@ -617,13 +617,13 @@ class FlashSales extends Module
 						{
 							$flashsales_offer = new FlashSalesOffer($result['id_flashsales_offer'], NULL);
 							$flashsales_offer->date_start = $nextPeriod;
-							$flashsales_offer->date_end		= date('Y-m-d', (int)(Configuration::get($this->_abbreviation . '_NEXT_PERIOD') + (int)(Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD'))));
+							$flashsales_offer->date_end = date('Y-m-d', (int)(Configuration::get($this->_abbreviation . '_NEXT_PERIOD') + (int)(Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD'))));
 							$flashsales_offer->update();
 						}
 					}
 				}
 				Configuration::updateValue($this->_abbreviation . '_CURRENT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
-				$this->_emptyCache(false);
+				//$this->_emptyCache(false);
 				break;
 			case 2:
 				// CLEAR CACHE
@@ -675,30 +675,29 @@ class FlashSales extends Module
 		global $smarty, $cookie, $link;
 
 		// Cache
-		$smartyCacheId = self::$cacheFiles[0] . '|' . Configuration::get('FS_CACHE_ID');
+		//$smartyCacheId = self::$cacheFiles[0] . '|' . Configuration::get('FS_CACHE_ID');
 		$templateName = self::$cacheFiles[0] .'.tpl';
 
-		Tools::enableCache();
-		$end = Configuration::get($this->_abbreviation . '_NEXT_PERIOD');
-		$now = time();
-		$smarty->cache_lifetime = $end - $now;
+		//Tools::enableCache();
+		//$end = Configuration::get($this->_abbreviation . '_NEXT_PERIOD');
+		//$now = time();
+		//$smarty->cache_lifetime = $end - $now;
 
-		if (!$this->isCached($templateName, $smartyCacheId))
-		{
-			$vars = array(
-				'module_name' => strtoupper($this->name),
-				'offers' => FlashsalesOffer::getOffersForTheDay(date('Y/m/d', (int)Configuration::get('FS_CURRENT_PERIOD')), (int)$cookie->id_lang),
-				''
-			);
+		//if (!$this->isCached($templateName, $smartyCacheId))
+		//{
+		$vars = array(
+			'module_name' => strtoupper($this->name),
+			'offers' => FlashsalesOffer::getOffersForTheDay(date('Y/m/d', (int)Configuration::get('FS_CURRENT_PERIOD')), (int)$cookie->id_lang),
+			''
+		);
 
-			foreach($this->_imageType AS $image)
-				$smarty->assign($image['name'] . 'Size', Image::getSize($image['name']));
+		foreach($this->_imageType AS $image)
+			$smarty->assign($image['name'] . 'Size', Image::getSize($image['name']));
 
-			$smarty->assign(strtolower($this->name), $vars);
-		}
+		$smarty->assign(strtolower($this->name), $vars);
 
-		$display = $this->display(__FILE__, $templateName, $smartyCacheId);
-		Tools::restoreCacheSettings();
+		$display = $this->display(__FILE__, $templateName);
+		//Tools::restoreCacheSettings();
 
 		return $display;
 	}
