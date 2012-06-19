@@ -584,7 +584,7 @@ class FlashSales extends Module
 				// SET CRON TASK TO CHANGE NEXT PERIOD (h-1 CURRENT PERIOD)
 				Configuration::updateValue($this->_abbreviation . '_NEXT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_BETWEEN_PERIOD') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
 				// Check if all offers for the day
-				$nextPeriod = date('Y-m-d', Configuration::get($this->_abbreviation . '_NEXT_PERIOD'));
+				/*$nextPeriod = date('Y-m-d', Configuration::get($this->_abbreviation . '_NEXT_PERIOD'));
 				$nbOffersOfTheDay = FlashsalesOffer::getNumberOffersForTheDay($nextPeriod);
 				$nbOffersNeeded = Configuration::get($this->_abbreviation . '_NB_OFFERS');
 				if($nbOffersOfTheDay < $nbOffersNeeded)
@@ -601,7 +601,7 @@ class FlashSales extends Module
 					ORDER by `nb_demand` DESC
 					LIMIT ' . (int)$nbOffersMissing;
 					$results = Db::getInstance()->ExecuteS($sql);
-					if(empty($results))
+					/*if(empty($results))
 					{
 						$sql = 'SELECT fo.`id_flashsales_offer`, COUNT(fom.`id_flashsales_offer`) AS `nb_demand`
 						FROM `'._DB_PREFIX_.'flashsales_offer` fo
@@ -610,8 +610,8 @@ class FlashSales extends Module
 						ORDER by `nb_demand`
 						LIMIT ' . (int)$nbOffersMissing;
 						$results = Db::getInstance()->ExecuteS($sql);
-					}
-					if(!empty($results))
+					}*/
+					/*if(!empty($results))
 					{
 						foreach($results AS $result)
 						{
@@ -621,7 +621,7 @@ class FlashSales extends Module
 							$flashsales_offer->update();
 						}
 					}
-				}
+				}*/
 				Configuration::updateValue($this->_abbreviation . '_CURRENT_PERIOD', strtotime('midnight') + Configuration::get($this->_abbreviation . '_TIME_START_DAY'));
 				//$this->_emptyCache(false);
 				break;
