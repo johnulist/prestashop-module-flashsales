@@ -88,7 +88,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 		</script>
 			<div class="left-side">
 				<h2>{$product->name|escape:'htmlall':'UTF-8'}</h2>
-				<h3>{$product->description|nl2br|strip_tags}</h3>
+				<h3>{$product->description}</h3>
 				<div class="thumbnail-sub-product">
 					{assign var=imageIds value="`$product->id`-`$cover.id_image`"}
 					<img src="{$link->getImageLink($product->link_rewrite, $imageIds, 'large')}" title="{$product->name|escape:'htmlall':'UTF-8'}" alt="{$product->name|escape:'htmlall':'UTF-8'}" class="bigpic hidden" />
