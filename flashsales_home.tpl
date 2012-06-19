@@ -84,12 +84,14 @@
 							<p class="price">{$priceSplit[0]}<span class="cts-minimify">,{$priceSplit[1]}</span></p>
 							<p class="price-red">{$priceSplit[0]}<span class="cts-minimify">,{$priceSplit[1]}</span></p>
 						</div>
+						<div>
 						{if $offer->prices['reduction']}
 						<span class="original-price">{$price_reduce}</span>
 						{/if}
 						{if $offer->prices['reduction'] AND $offer->prices['reduction'].reduction_type == 'percentage'}
 							<span class="remise">-{$offer->prices['reduction'].reduction*100}%</span>
 						{/if}
+						</div>
 						{if $offer->nbProductsAlreadyBuy > 0}
 						<p class="product-sell">{l s='Déjà'} {$offer->nbProductsAlreadyBuy} {l s='produits achetés !'}</p>
 						{/if}
