@@ -99,7 +99,7 @@ class FlashSalesOfferControllerCore extends FrontController
 		{
 			self::$smarty->assign('flashsalesoffer_name', $this->flashsalesoffer->name);
 			self::$smarty->assign('flashsalesoffer_description', $this->flashsalesoffer->description);
-			self::$smarty->assign('flashsalesoffer_image', $this->flashsalesoffer->images[0]);
+			self::$smarty->assign('flashsalesoffer_image', $this->flashsalesoffer->images[0]['imgIds']);
 			self::$smarty->assign('flashsalesoffer_price', $this->flashsalesoffer->prices['min_price']);
 		}
 		parent::displayHeader();

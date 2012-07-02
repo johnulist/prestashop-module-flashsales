@@ -66,6 +66,7 @@ class FlashSalesOffer extends ObjectModel
 			$this->images		 = $this->getImages($id_lang);
 			$this->prices = $this->getPricesOffer();
 			$this->nbProductsAlreadyBuy = $this->getNumberProductsAlreadyBuyInOffer();
+			$this->nbProductsAlreadyBuyAll = $this->getNumberProductsAlreadyBuyInOfferAll();
 			$this->offerLink = self::getOfferLink($this);
 			if($type == 'fully')
 			{
@@ -290,7 +291,7 @@ class FlashSalesOffer extends ObjectModel
 		else
 			return null;
 	}
-	
+
 	public function getNumberProductsAlreadyBuyInOffer()
 	{
 		$sql = 'SELECT COUNT(od.`product_id`) AS `nb`
@@ -299,6 +300,17 @@ class FlashSalesOffer extends ObjectModel
 		LEFT JOIN `'._DB_PREFIX_.'orders` o ON (o.`id_order` = od.`id_order`)
 		WHERE fp.`id_flashsales_offer` = '.(int)($this->id) . '
 		AND DATE(o.`date_add`) = CURRENT_DATE()';
+		$result = Db::getInstance()->getRow($sql);
+		return $result['nb'];
+	}
+
+	public function getNumberProductsAlreadyBuyInOfferAll()
+	{
+		$sql = 'SELECT COUNT(od.`product_id`) AS `nb`
+		FROM `'._DB_PREFIX_.'flashsales_product` fp
+		LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON (od.`product_id` = fp.`id_product`)
+		LEFT JOIN `'._DB_PREFIX_.'orders` o ON (o.`id_order` = od.`id_order`)
+		WHERE fp.`id_flashsales_offer` = '.(int)($this->id);
 		$result = Db::getInstance()->getRow($sql);
 		return $result['nb'];
 	}
@@ -419,13 +431,13 @@ class FlashSalesOffer extends ObjectModel
 		return $images;
 	}
 
-	public function extendSelection($selection)
+	public static function extendSelection($selection)
 	{
-		if (!is_array($selection) OR !Validate::isTableOrIdentifier($this->identifier) OR !Validate::isTableOrIdentifier($this->table))
+		if (!is_array($selection))
 			die(Tools::displayError());
 		$result = true;
-		$this->id = (int)($selection[0]);
-		$date_end = $this->date_end;
+		$flashsalesOffer = new FlashSalesOffer($selection[0]);
+		$date_end = $flashsalesOffer->date_end;
 		$nbOffersForTheDay = self::getNumberOffersForTheDay($date_end); // 1
 		$nbOffersToExtend	 = count($selection); // 1
 		$nbOffers = Configuration::get('FS_NB_OFFERS'); // 4
@@ -456,13 +468,13 @@ class FlashSalesOffer extends ObjectModel
 			$errors = array();
 			foreach ($selection AS $id)
 			{
-				$this->id = (int)($id);
-				if(strtotime($this->date_end) - strtotime($this->date_start) + Configuration::get('FS_TIME_BETWEEN_PERIOD') > 2 * Configuration::get('FS_TIME_BETWEEN_PERIOD'))
-					$errors[] = Tools::displayError('Cannot extend offer') . ' "' . $this->id .'"' . Tools::displayError(': it\'s already extend');
+			    $flashsalesOffer = new FlashsalesOffer((int)($id));
+				if(strtotime($flashsalesOffer->date_end) - strtotime($flashsalesOffer->date_start) + Configuration::get('FS_TIME_BETWEEN_PERIOD') > 2 * Configuration::get('FS_TIME_BETWEEN_PERIOD'))
+					$errors[] = Tools::displayError('Cannot extend offer') . ' "' . $flashsalesOffer->id .'"' . Tools::displayError(': it\'s already extend');
 				else
 				{
-					$this->date_end = date('Y-m-d', strtotime($this->date_end) + Configuration::get('FS_TIME_BETWEEN_PERIOD'));
-					if(!$this->update())
+					$flashsalesOffer->date_end = date('Y-m-d', strtotime($flashsalesOffer->date_end) + Configuration::get('FS_TIME_BETWEEN_PERIOD'));
+					if(!$flashsalesOffer->update())
 						$result = false;
 				}
 			}

@@ -556,7 +556,7 @@ class AdminFlashSalesOffer extends AdminTab
 					$result = true;
 
 				if ($result)
-					$result = $flashsales_offer->extendSelection($array);
+					$result = FlashSalesOffer::extendSelection($array);
 
 				if ($result === true)
 					Tools::redirectAdmin($currentIndex.'&conf=4&token='.Tools::getAdminTokenLite('AdminFlashSalesContent').'&id_flashsales_category='. $flashsales_offer->id_flashsales_category);

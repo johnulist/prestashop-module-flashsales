@@ -92,8 +92,12 @@
 							<span class="remise">-{$offer->prices['reduction'].reduction*100}%</span>
 						{/if}
 						</div>
-						{if $offer->nbProductsAlreadyBuy > 0}
-						<p class="product-sell">{l s='Déjà'} {$offer->nbProductsAlreadyBuy} {l s='produits achetés !'}</p>
+						{if $offer->nbProductsAlreadyBuyAll > 0}
+							{if $offer->nbProductsAlreadyBuyAll > 1}
+							<p class="product-sell">{l s='Déjà'} {$offer->nbProductsAlreadyBuy} {l s='produits achetés !'}</p>
+							{else}
+							<p class="product-sell">{l s='Déjà'} {$offer->nbProductsAlreadyBuy} {l s='produit acheté !'}</p>
+							{/if}
 						{/if}
 						<a href="{$offer->offerLink}" class="sprite acheter"></a>
 						<a href="{$offer->offerLink}" class="offer-to-friends"><i class="sprite cadeau"></i>{l s='Offrez-le à un ami'}</a>
