@@ -23,7 +23,7 @@ var ecotaxTax_rate 	= {$ecotaxTax_rate};
 	<div class="price-container clearfix">
 		<p class="price">{$priceSplit[0]}<span class="cts-minimify">,{$priceSplit[1]}</span></p>
 		<p class="price-red">{$priceSplit[0]}<span class="cts-minimify">,{$priceSplit[1]}</span></p>
-	</div>
+	</div style="height:20px">
 	{if $flashsalesoffer->prices['reduction']}
 	<span class="original-price">{$price_reduce}</span>
 	{/if}
