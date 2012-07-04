@@ -371,7 +371,7 @@ class AdminFlashSalesOffer extends AdminTab
 
 			if(!isset($_POST['flashsales_offer_image']) || empty($_POST['flashsales_offer_image']))
 				$this->_errors[] = Tools::displayError('You need to select the default picture of the offer');
-			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) != Configuration::get('FS_NB_PICTURES') && Configuration::get('FS_NB_PICTURES') != 0)
+			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) < 1 && Configuration::get('FS_NB_PICTURES') != 0)
 				$this->_errors[] = Tools::displayError('You have to select') . ' ' . Configuration::get('FS_NB_PICTURES') . ' ' . Tools::displayError('images');
 			elseif(strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD') < strtotime(date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'))) + Configuration::get('FS_TIME_BETWEEN_PERIOD') && !isset($_POST['flashsales_old']))
 				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');
