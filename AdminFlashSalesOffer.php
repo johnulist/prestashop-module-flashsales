@@ -29,7 +29,7 @@ class AdminFlashSalesOffer extends AdminTab
 		$this->fieldsDisplay = array(
 			'id_' . strtolower($this->table)		=> array('title' => $this->l('ID'), 'align' => 'center', 'width' => 25),
 			'name' => array('title' => $this->l('Name'), 'width' => 280, 'filter_key' => 'b!name'),
-			'date_start' => array('title' => $this->l('Date start'), 'width' => 35, 'align' => 'right', 'type' => 'date', 'filter_key' => 'a!date_start'),
+			'date_start' => array('title' => $this->l('Date start'), 'width' => 35, 'align' => 'right', 'type' => 'date', 'filter_key' => 'a!date_start', 'required' => false),
 			'date_end' => array('title' => $this->l('Date end'), 'width' => 35, 'align' => 'right', 'type' => 'date', 'filter_key' => 'a!date_end'),
 			'position' => array('title' => $this->l('Position'), 'width' => 40,'filter_key' => 'position', 'align' => 'center', 'position' => 'position'),
 			'default' => array('title' => $this->l('Default'), 'width' => 25, 'align' => 'center', 'type' => 'bool', 'orderby' => false),
@@ -117,6 +117,8 @@ class AdminFlashSalesOffer extends AdminTab
 					</div>';
 		}
 		// DATE START
+		if(!isset($_GET['flashsales_day']))
+		{
 		includeDatepicker(array('date_start'), false);
 		echo '		
 				<label>'.$this->l('Start:').' </label>
@@ -124,7 +126,8 @@ class AdminFlashSalesOffer extends AdminTab
 					<input type="text" size="20" id="date_start" name="date_start" value="'.($this->getFieldValue($obj, 'date_start') ? htmlentities($this->getFieldValue($obj, 'date_start'), ENT_COMPAT, 'UTF-8') : date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'))).'" /> <sup>*</sup>
 					<p class="clear">'.$this->l('Start date from which offer can be displayed').'<br />'.$this->l('Format: YYYY-MM-DD').'</p>
 				</div>';
-				
+		}
+
 		// SUMMARY
 		echo '<label>'.$this->l('Summary:').' </label>
 					<div class="margin-form translatable">';
@@ -373,8 +376,8 @@ class AdminFlashSalesOffer extends AdminTab
 				$this->_errors[] = Tools::displayError('You need to select the default picture of the offer');
 			elseif(isset($_POST['flashsales_offer_image']) && !empty($_POST['flashsales_offer_image']) && count($_POST['flashsales_offer_image']) < 1 && Configuration::get('FS_NB_PICTURES') != 0)
 				$this->_errors[] = Tools::displayError('You have to select') . ' ' . Configuration::get('FS_NB_PICTURES') . ' ' . Tools::displayError('images');
-			elseif(strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD') < strtotime(date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'))) + Configuration::get('FS_TIME_BETWEEN_PERIOD') && !isset($_POST['flashsales_old']))
-				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');
+			/*elseif(strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD') < strtotime(date('Y-m-d', Configuration::get('FS_NEXT_PERIOD'))) + Configuration::get('FS_TIME_BETWEEN_PERIOD') && !isset($_POST['flashsales_old']))
+				$this->_errors[] = Tools::displayError('The date cannot be set to today or previous time');*/
 			elseif(FlashSalesOffer::getNumberOffersForTheDay(Tools::getValue('date_start')) >= Configuration::get('FS_NB_OFFERS') && !$id_flashsales_offer)
 				$this->_errors[] = Tools::displayError('You cannot add offer for this date, there are too much (max:') . ' ' . Configuration::get('FS_NB_OFFERS') . ')';
 
@@ -433,7 +436,8 @@ class AdminFlashSalesOffer extends AdminTab
 				{
 					$flashsales_offer = new FlashSalesOffer($id_flashsales_offer);
 					$this->copyFromPost($flashsales_offer, 'flashsales_offer');
-					$flashsales_offer->date_end = date('Y-m-d', strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD'));
+					if(isset($_POST['date_start']))
+					    $flashsales_offer->date_end = date('Y-m-d', strtotime(Tools::getValue('date_start')) + Configuration::get('FS_TIME_BETWEEN_PERIOD'));
 					if (!$flashsales_offer->update())
 						$this->_errors[] = Tools::displayError('An error occurred while updating object.').' <b>'.$this->table.' ('.mysql_error().')</b>';
 					else

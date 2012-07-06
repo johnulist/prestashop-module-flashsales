@@ -30,7 +30,7 @@ class FlashSalesOffer extends ObjectModel
 	protected $table = 'flashsales_offer';
 	protected $identifier = 'id_flashsales_offer';
 
-	protected $fieldsRequired = array('active', 'date_start');
+	protected $fieldsRequired = array('active');
 	protected $fieldsRequiredLang = array('name', 'description', 'description_short', 'link_rewrite');
 	protected $fieldsSize = array('default' => 1, 'video' => 11);
 	protected $fieldsSizeLang = array('name' => 128, 'link_rewrite' => 128, 'meta_title' => 128, 'meta_keywords' => 255, 'meta_description' => 255);
