@@ -687,7 +687,7 @@ class FlashSales extends Module
 		//{
 		$vars = array(
 			'module_name' => strtoupper($this->name),
-			'offers' => FlashsalesOffer::getOffersForTheDay(date('Y/m/d', (int)Configuration::get('FS_CURRENT_PERIOD')), (int)$cookie->id_lang),
+			'offers' => FlashsalesOffer::getOffersForTheDay(date('Y/m/d', (int)Configuration::get('FS_NEXT_PERIOD')), (int)$cookie->id_lang),
 			''
 		);
 
